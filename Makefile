@@ -7,7 +7,7 @@ SRC_BONUS = ./philo_bonus/philo_bonus.c
 OBJ = $(SRC:.c=.o)
 OBJ_BONUS = $(SRC_BONUS:.c=.o)
 
-FLAGS = -Wall -Werror -Wextra
+FLAGS = -Wall -Werror -Wextra -pthread
 
 all: $(NAME) 
 

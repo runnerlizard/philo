@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <pthread.h>
+
+void *routine(int num)
+{
+	printf("Test pthread  %d\n", num);
+}
 
 static int	ft_putstr_fd(char *s, int fd)
 {
@@ -16,6 +22,11 @@ static int	ft_putstr_fd(char *s, int fd)
 
 int main (int argc, char *argv[])
 {
-	ft_putstr_fd(argv[0], argc);
-	return (ft_putstr_fd("Wrong arguments\n", argc));
+	pthread_t	t[ft_atoi(argv[1])];
+
+	if (pthread_create(&t[i], NULL, &routine, i) != 0)
+		return (ft_putstr_fd ("Thread creating error", 1));
+	if (pthread_join(t[i], NULL) != 0)
+		return (ft_putstr_fd ("Thread joining error", 1));
+	return (0);
 }
