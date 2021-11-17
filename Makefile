@@ -1,5 +1,7 @@
 NAME = philo
 NAME_BONUS = philo_bonus
+LIBFT = libft/libft.a
+PRINTF = printf/libftprintf.a
 
 SRC = philo.c
 SRC_BONUS = ./philo_bonus/philo_bonus.c
@@ -7,26 +9,36 @@ SRC_BONUS = ./philo_bonus/philo_bonus.c
 OBJ = $(SRC:.c=.o)
 OBJ_BONUS = $(SRC_BONUS:.c=.o)
 
-FLAGS = -Wall -Werror -Wextra -pthread
+FLAGS = -Wall -Werror -Wextra -O2 -pthread
 
-all: $(NAME) 
+all: $(LIBFT) $(PRINTF) $(NAME) 
 
-bonus: $(NAME_BONUS)
+bonus: $(LIBFT) $(PRINTF) $(NAME_BONUS)
 
-$(NAME): $(OBJ) Makefile
-	gcc $(OBJ) -o $(NAME)
+$(LIBFT):
+	make -C libft
 
-$(NAME_BONUS): $(OBJ_BONUS) Makefile
-	gcc $(OBJ_BONUS) -o $(NAME_BONUS)
+$(PRINTF):
+	make -C printf
+
+$(NAME): $(OBJ) Makefile $(LIBFT) $(PRINTF)
+	gcc $(OBJ) -L./libft -lft -L./printf -lftprintf -o $(NAME)
+
+$(NAME_BONUS): $(OBJ_BONUS) Makefile $(LIBFT)
+	gcc $(OBJ_BONUS) -L./libft -lft -L./printf -lftprintf -o $(NAME_BONUS)
 
 %.o:	%.c
-	@gcc $(FLAGS) -c $< -o $@
+	gcc $(FLAGS) -I libft -I printf -c $< -o $@
 
 clean:
-	@rm $(OBJ) $(OBJ_BONUS)
+	make clean -sC libft
+	make clean -sC printf
+	rm -f $(OBJ) $(OBJ_BONUS)
 
 fclean:	clean
-	@rm $(NAME) $(NAME_BONUS)
+	make fclean -sC libft
+	make fclean -sC printf
+	rm -f $(NAME) $(NAME_BONUS)
 
 re: fclean all
 
