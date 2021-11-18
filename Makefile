@@ -9,7 +9,7 @@ SRC_BONUS = ./philo_bonus/philo_bonus.c
 OBJ = $(SRC:.c=.o)
 OBJ_BONUS = $(SRC_BONUS:.c=.o)
 
-FLAGS = -Wall -Werror -Wextra -O2 -pthread
+FLAGS = -Wall -Werror -Wextra -O2
 
 all: $(LIBFT) $(PRINTF) $(NAME) 
 
@@ -28,7 +28,7 @@ $(NAME_BONUS): $(OBJ_BONUS) Makefile $(LIBFT)
 	gcc $(OBJ_BONUS) -L./libft -lft -L./printf -lftprintf -o $(NAME_BONUS)
 
 %.o:	%.c
-	gcc $(FLAGS) -I libft -I printf -c $< -o $@
+	gcc $(FLAGS) -I libft -I printf -c $< -o $@ -lpthread
 
 clean:
 	make clean -sC libft
