@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <pthread.h>
-
-pthread_mutex_t	mutex;
-int				*i;
-int 			j;
+#include "philo.h"
 
 int	ft_atoi(const char *str)
 {
@@ -37,122 +29,90 @@ int	ft_atoi(const char *str)
 	return (a * sign);
 }
 
-int	ft_putstr_fd(char *s, int fd)
+static int check_args(t_philo *ph, int argc, char **argv)
 {
-	size_t	i;
-
-	i = 0;
-	while (s[i])
-		if (write (fd, &s[i++], 1) == -1)
-			return(0);
-	return (i);
-}
-
-long int	ft_abs(long int n)
-{
-	if (n < 0)
-		n = -n;
-	return (n);
-}
-
-int	ft_write_small(int fd, long int n)
-{
-	char	res;
-
-	res = n + 48;
-	if (write(fd, &res, 1) == -1)
-		return(0);
-	return (1);
-}
-
-int	ft_write_big(int fd, long int n)
-{
-	char		res;
-	long int	k;
-	int			i;
-
-	k = 10;
-	while (n / k >= 10)
-		k = k * 10;
-	i = 0;
-	while (k >= 1)
-	{
-		res = (n % (10 * k)) / k + 48;
-		if (write(fd, &res, 1) == -1)
-			i++;
-		k = k / 10;
-	}
-	return (i);
-}
-
-int	ft_putnbr_fd(int n, int fd)
-{
-	long int	n1;
-	char		res;
-	int			i;
-
-	i = 0;
-	if (n < 0)
-	{
-		res = '-';
-		if (write(fd, &res, 1) != -1)
-			i++;
-	}
-	n1 = ft_abs(n);
-	if (n1 > 9)
-		i = i + ft_write_big(fd, n1);
-	else
-		i = i + ft_write_small(fd, n1);
-	return (i);
-}
-
-static int check_args(int *i, int argc, char **argv)
-{
-	int	j;
-
 	if ((argc != 6) && (argc != 5))
 		return (printf("Invalid arguments number. Must be 5 or 4\n"));
-	j = 0;
-	while (argv[++j])
-		if ((i[j - 1] = ft_atoi(argv[j])) <= 0)
-			return (printf("Invalid argument: %s. Must be positive number\n", argv[j]));
+	ph->n = ft_atoi(argv[1]);
+	ph->die_time = ft_atoi(argv[2]);
+	ph->eat_time = ft_atoi(argv[3]);
+	ph->sleep_time = ft_atoi(argv[4]);
+	ph->number = -1;
+	if (argc == 6)
+		ph->number = ft_atoi(argv[5]);
+	if ((ph->n < 1) || (ph->die_time < 0) || (ph->eat_time < 0) || (ph->sleep_time < 0) || ( (argc == 6) && (ph->number < 0)))
+		return (printf("Invalid arguments.\n"));
 	return (0);
 }
 
-void	*routine()
+static void	*routine(void *p)
 {	
-	pthread_mutex_lock(&mutex);
-	ft_putnbr_fd(j++, 1);
-	ft_putstr_fd(" has taken a fork\n", 1);
-	pthread_mutex_unlock(&mutex);
+	struct timeval	tv2;
+	struct timeval	tv3;
+	struct timezone	tz;
+	t_philo			ph;
+
+	ph = *(t_philo *)p;
+	gettimeofday(&tv3, &tz);
+	while (1)
+	{
+		gettimeofday(&tv2, &tz);
+		printf("%ld %d is thinking\n", (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n);
+		pthread_mutex_lock(&mutex);
+		gettimeofday(&tv2, &tz);
+		if ((tv2.tv_sec - tv3.tv_sec) * 1000 + (tv2.tv_usec - tv3.tv_usec) > i[1] * 1000)
+		{
+			printf("%ld %d died\n", (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n);
+			pthread_mutex_unlock(&mutex);
+			return (NULL);
+		}
+		printf("%ld %d has taken a fork\n%ld %d is eating\n", (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n, (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n);
+		tv3.tv_sec = tv2.tv_sec;
+		tv3.tv_usec = tv2.tv_usec;
+		usleep(i[2] * 1000);
+		pthread_mutex_unlock(&mutex);
+		gettimeofday(&tv2, &tz);
+		printf("%ld %d is sleeping\n", (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n);
+		usleep(i[3] * 1000);
+	}
 	return (NULL);
 }
 
 int main (int argc, char *argv[])
 {
 	pthread_t		*t;
+	t_philo			ph;
+	int				i;
+	struct timeval	tv1;
+	struct timezone	tz;
 
 	if ((i = (int *)malloc(sizeof(int) * argc)) == NULL)
 		return (printf("Malloc error.\n"));
-	if ((j = check_args(i, argc, argv)) != 0)
-		return (printf("%d\n", j));
+	if ((i[argc] = check_args(*ph, argc, argv)) != 0)
+		return (1);
 /*	if ((mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * i[0])) == NULL)
 		return (printf("Malloc error for mutex.\n"));*/
-	if ((t = (pthread_t *)malloc(sizeof(pthread_t) * i[0])) == NULL)
+	gettimeofday(&tv1, &tz);
+	ph->sec = tv1.tv_sec;
+	ph->usec = tv1.tv_usec;
+	if ((t = (pthread_t *)malloc(sizeof(pthread_t) * ph->n)) == NULL)
 		return (printf("Malloc error for pthread.\n"));
-	pthread_mutex_init(&mutex, NULL);
-	j = 0;
-	while (j < i[0] - 1)
-		if (pthread_create(t + j, NULL, &routine, NULL) != 0)
-			return (printf("pthread_create error!\n"));
-	while (j-- > 0)
+	pthread_mutex_init(&ph->mutex, NULL);
+	i = -1;
+	while (++i < ph->n)
 	{
-		printf("joined %d\n", j);
+		if (pthread_create(t + i, NULL, &routine, &ph) != 0)
+			return (printf("pthread_create error!\n"));
+		usleep(10);
+	}
+	usleep(200000000);
+/*	while (j-- > 0)
+	{
+		printf("joined %d\n", i[0] - j);
 		if (pthread_join(t[j], NULL) != 0)
 			return (printf("pthread_join error!\n"));
-	}
-	pthread_mutex_destroy(&mutex);
-	while (i[j])
-		printf("%d\n", i[j++]);
+		usleep(10);
+	}*/
+	pthread_mutex_destroy(&ph->mutex);
 	return (argc);
 }

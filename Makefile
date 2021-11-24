@@ -9,14 +9,14 @@ OBJ_BONUS = $(SRC_BONUS:.c=.o)
 
 FLAGS = -Wall -Werror -Wextra -O2
 
-all: $(NAME) 
+all: $(NAME) philo.h
 
-bonus: $(NAME_BONUS)
+bonus: $(NAME_BONUS) philo.h
 
-$(NAME): $(OBJ) Makefile 
+$(NAME): $(OBJ) Makefile philo.h 
 	gcc $(OBJ) -o $(NAME) -pthread
 
-$(NAME_BONUS): $(OBJ_BONUS) Makefile 
+$(NAME_BONUS): $(OBJ_BONUS) Makefile philo.h 
 	gcc $(OBJ_BONUS) -o $(NAME_BONUS) -pthread
 
 %.o:	%.c
