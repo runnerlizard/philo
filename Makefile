@@ -1,8 +1,8 @@
 NAME = philo
 NAME_BONUS = philo_bonus
 
-SRC = philo.c
-SRC_BONUS = ./philo_bonus/philo_bonus.c
+SRC = philo.c message.c ft_putnbr_fd.c
+SRC_BONUS = ./philo_bonus/philo_bonus.c message.c ft_putnbr_fd.c
 
 OBJ = $(SRC:.c=.o)
 OBJ_BONUS = $(SRC_BONUS:.c=.o)

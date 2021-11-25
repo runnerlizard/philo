@@ -24,9 +24,71 @@ int	ft_atoi(const char *str)
 	}
 	if ((a > 2147483648) && (sign == -1))
 		return (0);
-	if ((a > 2147483648) || ((a == 2147483648) & (sign == 1)))
+	if ((a > 2147483648) || ((a == 2147483648) && (sign == 1)))
 		return (-1);
 	return (a * sign);
+}
+
+static long int get_time()
+{
+	static struct timeval	tv1;
+	struct timeval			tv2;
+	static struct timezone	tz;
+	static int				i;
+	
+	if (i == 0)
+	{
+		i = 1;
+		gettimeofday(&tv1, &tz);
+	}
+	else
+	{
+		gettimeofday(&tv2, &tz);
+		return ((tv2.tv_sec - tv1.tv_sec) * 1000 + (tv2.tv_usec - tv1.tv_usec) / 1000);
+	}
+	return (0);
+}
+
+static void	*routine(void *ph)
+{	
+	int		p_num;
+	t_philo *local;
+
+	local = (t_philo *)ph;
+	p_num = local->p_num + 1;
+	local->last_meal[p_num] = get_time();
+	while (1)
+	{
+		message(get_time(), p_num, " is thinking\n", &local->send_mes);
+		pthread_mutex_lock(&local->fork[p_num]);
+		if (p_num == local->n)
+			pthread_mutex_lock(&local->fork[1]);
+		else
+			pthread_mutex_lock(&local->fork[p_num + 1]);
+		usleep(10);
+		if (get_time() - local->last_meal[p_num] > local->die_time)
+		{
+			message(get_time(), p_num, " died\n", &local->send_mes);
+			pthread_mutex_unlock(&local->fork[p_num]);
+			if (p_num == local->n)
+				pthread_mutex_unlock(&local->fork[1]);
+			else
+				pthread_mutex_unlock(&local->fork[p_num + 1]);
+			return (NULL);
+		}
+		local->last_meal[p_num] = get_time();
+		message(get_time(), p_num, " has taken a fork\n", &local->send_mes);
+		message(get_time(), p_num, " is eating\n", &local->send_mes);
+		usleep(local->eat_time * 1000);
+		pthread_mutex_unlock(&local->fork[p_num]);
+		if (p_num == local->n)
+			pthread_mutex_unlock(&local->fork[1]);
+		else
+			pthread_mutex_unlock(&local->fork[p_num + 1]);
+		message(get_time(), p_num, " is sleeping\n", &local->send_mes);
+		usleep(local->sleep_time * 1000);
+	}
+	return (NULL);
 }
 
 static int check_args(t_philo *ph, int argc, char **argv)
@@ -45,67 +107,36 @@ static int check_args(t_philo *ph, int argc, char **argv)
 	return (0);
 }
 
-static void	*routine(void *p)
-{	
-	struct timeval	tv2;
-	struct timeval	tv3;
-	struct timezone	tz;
-	t_philo			ph;
-
-	ph = *(t_philo *)p;
-	gettimeofday(&tv3, &tz);
-	while (1)
-	{
-		gettimeofday(&tv2, &tz);
-		printf("%ld %d is thinking\n", (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n);
-		pthread_mutex_lock(&mutex);
-		gettimeofday(&tv2, &tz);
-		if ((tv2.tv_sec - tv3.tv_sec) * 1000 + (tv2.tv_usec - tv3.tv_usec) > i[1] * 1000)
-		{
-			printf("%ld %d died\n", (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n);
-			pthread_mutex_unlock(&mutex);
-			return (NULL);
-		}
-		printf("%ld %d has taken a fork\n%ld %d is eating\n", (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n, (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n);
-		tv3.tv_sec = tv2.tv_sec;
-		tv3.tv_usec = tv2.tv_usec;
-		usleep(i[2] * 1000);
-		pthread_mutex_unlock(&mutex);
-		gettimeofday(&tv2, &tz);
-		printf("%ld %d is sleeping\n", (tv2.tv_sec - ph->sec) * 1000 + (tv2.tv_usec - ph->usec) / 1000, ph->n);
-		usleep(i[3] * 1000);
-	}
-	return (NULL);
-}
-
 int main (int argc, char *argv[])
 {
 	pthread_t		*t;
-	t_philo			ph;
+	t_philo			*ph;
 	int				i;
-	struct timeval	tv1;
-	struct timezone	tz;
-
-	if ((i = (int *)malloc(sizeof(int) * argc)) == NULL)
-		return (printf("Malloc error.\n"));
-	if ((i[argc] = check_args(*ph, argc, argv)) != 0)
+	
+	if (!(ph = malloc(sizeof(t_philo))))
 		return (1);
-/*	if ((mutex = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * i[0])) == NULL)
-		return (printf("Malloc error for mutex.\n"));*/
-	gettimeofday(&tv1, &tz);
-	ph->sec = tv1.tv_sec;
-	ph->usec = tv1.tv_usec;
+	if (check_args(ph, argc, argv) != 0)
+		return (1);
+	if (!(ph->fork = (pthread_mutex_t*)malloc(sizeof(*(ph->fork)) * ph->n)))
+		return (1);
+	if (!(ph->last_meal = (int*)malloc(sizeof(int) * ph->n)))
+		return (1);
+	i = 0;
+	while (i < ph->n)
+		pthread_mutex_init(&ph->fork[i++], NULL);
+	pthread_mutex_init(&ph->send_mes, NULL);
 	if ((t = (pthread_t *)malloc(sizeof(pthread_t) * ph->n)) == NULL)
 		return (printf("Malloc error for pthread.\n"));
-	pthread_mutex_init(&ph->mutex, NULL);
 	i = -1;
+	get_time();
 	while (++i < ph->n)
 	{
-		if (pthread_create(t + i, NULL, &routine, &ph) != 0)
+		ph->p_num = i;
+		if (pthread_create(t + i, NULL, &routine, ph) != 0)
 			return (printf("pthread_create error!\n"));
 		usleep(10);
 	}
-	usleep(200000000);
+	usleep(100000000);
 /*	while (j-- > 0)
 	{
 		printf("joined %d\n", i[0] - j);
@@ -113,6 +144,6 @@ int main (int argc, char *argv[])
 			return (printf("pthread_join error!\n"));
 		usleep(10);
 	}*/
-	pthread_mutex_destroy(&ph->mutex);
+
 	return (argc);
 }
