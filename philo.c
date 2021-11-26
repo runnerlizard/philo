@@ -60,11 +60,19 @@ static void	*routine(void *ph)
 	while (1)
 	{
 		message(get_time(), p_num, " is thinking\n", &local->send_mes);
+		if (p_num % 2 == 0)
+			usleep(local->eat_time / 2);
 		pthread_mutex_lock(&local->fork[p_num]);
 		if (p_num == local->n)
+		{
+			//ft_putstr_fd("waiting first\n", 1);
 			pthread_mutex_lock(&local->fork[1]);
+		}
 		else
+		{
+			//ft_putstr_fd("waiting mine\n", 1);
 			pthread_mutex_lock(&local->fork[p_num + 1]);
+		}
 		usleep(10);
 		if (get_time() - local->last_meal[p_num] > local->die_time)
 		{
@@ -82,9 +90,15 @@ static void	*routine(void *ph)
 		usleep(local->eat_time * 1000);
 		pthread_mutex_unlock(&local->fork[p_num]);
 		if (p_num == local->n)
+		{
+			//ft_putstr_fd("last philo\n", 1);
 			pthread_mutex_unlock(&local->fork[1]);
+		}
 		else
+		{
+			//ft_putstr_fd("not last philo\n", 1);
 			pthread_mutex_unlock(&local->fork[p_num + 1]);
+		}
 		message(get_time(), p_num, " is sleeping\n", &local->send_mes);
 		usleep(local->sleep_time * 1000);
 	}
@@ -119,14 +133,19 @@ int main (int argc, char *argv[])
 		return (1);
 	if (!(ph->fork = (pthread_mutex_t*)malloc(sizeof(*(ph->fork)) * ph->n)))
 		return (1);
-	if (!(ph->last_meal = (int*)malloc(sizeof(int) * ph->n)))
+	ft_putstr_fd("here\n",1);
+	if (!(ph->last_meal = (int*)malloc(sizeof(*(ph->last_meal)) * ph->n)))
 		return (1);
+	ft_putstr_fd("here2\n",1);
 	i = 0;
-	while (i < ph->n)
+	while (i <= ph->n)
 		pthread_mutex_init(&ph->fork[i++], NULL);
 	pthread_mutex_init(&ph->send_mes, NULL);
-	if ((t = (pthread_t *)malloc(sizeof(pthread_t) * ph->n)) == NULL)
+	ft_putnbr_fd(ph->n, 1);
+	ft_putstr_fd("here3\n",1);
+	if (!(t = (pthread_t *)malloc(sizeof(t) * ph->n)))
 		return (printf("Malloc error for pthread.\n"));
+	ft_putstr_fd("here4\n",1);
 	i = -1;
 	get_time();
 	while (++i < ph->n)
