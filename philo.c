@@ -62,6 +62,8 @@ static void	*routine(void *ph)
 		message(get_time(), p_num, " is thinking\n", &local->send_mes);
 		if (p_num % 2 == 0)
 			usleep(local->eat_time / 2);
+		else
+			usleep(10);
 		pthread_mutex_lock(&local->fork[p_num]);
 		if (p_num == local->n)
 		{
@@ -107,8 +109,12 @@ static void	*routine(void *ph)
 
 static int check_args(t_philo *ph, int argc, char **argv)
 {
+	if (!(ph->fork = (pthread_mutex_t*)malloc(sizeof(*(ph->fork)) * ph->n)))
+		return (ft_putstr_fd("Malloc error for mutex\n", 1));
 	if ((argc != 6) && (argc != 5))
-		return (printf("Invalid arguments number. Must be 5 or 4\n"));
+		return (ft_putstr_fd("Invalid arguments number. Must be 5 or 4\n", 1));
+	if (!(ph->last_meal = (int*)malloc(sizeof(*(ph->last_meal)) * ph->n)))
+		return (1);
 	ph->n = ft_atoi(argv[1]);
 	ph->die_time = ft_atoi(argv[2]);
 	ph->eat_time = ft_atoi(argv[3]);
@@ -117,7 +123,7 @@ static int check_args(t_philo *ph, int argc, char **argv)
 	if (argc == 6)
 		ph->number = ft_atoi(argv[5]);
 	if ((ph->n < 1) || (ph->die_time < 0) || (ph->eat_time < 0) || (ph->sleep_time < 0) || ( (argc == 6) && (ph->number < 0)))
-		return (printf("Invalid arguments.\n"));
+		return (ft_putstr_fd("Invalid arguments.\n", 1));
 	return (0);
 }
 
@@ -127,25 +133,19 @@ int main (int argc, char *argv[])
 	t_philo			*ph;
 	int				i;
 	
-	if (!(ph = malloc(sizeof(t_philo))))
+	if ((!(ph = malloc(sizeof(t_philo)))) || (check_args(ph, argc, argv) != 0))
 		return (1);
-	if (check_args(ph, argc, argv) != 0)
-		return (1);
-	if (!(ph->fork = (pthread_mutex_t*)malloc(sizeof(*(ph->fork)) * ph->n)))
-		return (1);
-	ft_putstr_fd("here\n",1);
-	if (!(ph->last_meal = (int*)malloc(sizeof(*(ph->last_meal)) * ph->n)))
-		return (1);
-	ft_putstr_fd("here2\n",1);
+	ft_putstr_fd("here\n", 1);
 	i = 0;
 	while (i <= ph->n)
 		pthread_mutex_init(&ph->fork[i++], NULL);
+	ft_putstr_fd("here1\n", 1);
 	pthread_mutex_init(&ph->send_mes, NULL);
+	ft_putstr_fd("here2\n", 1);
 	ft_putnbr_fd(ph->n, 1);
-	ft_putstr_fd("here3\n",1);
 	if (!(t = (pthread_t *)malloc(sizeof(t) * ph->n)))
 		return (printf("Malloc error for pthread.\n"));
-	ft_putstr_fd("here4\n",1);
+	ft_putstr_fd("here3\n", 1);
 	i = -1;
 	get_time();
 	while (++i < ph->n)

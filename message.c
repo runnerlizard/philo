@@ -1,6 +1,6 @@
 #include "philo.h"
 
-void	ft_putstr_fd(char *s, int fd)
+int	ft_putstr_fd(char *s, int fd)
 {
 	size_t	i;
     int     j;
@@ -9,6 +9,7 @@ void	ft_putstr_fd(char *s, int fd)
     j = 0;
 	while (s[i])
 		j = j + write (fd, &s[i++], 1);
+    return (i);
 }
 
 void message(long int ms, int n, char *str, pthread_mutex_t *send_mes)

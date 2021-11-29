@@ -22,7 +22,7 @@ typedef struct		s_philo
 
 int     ft_atoi(char const *str);
 void    message(long int ms, int n, char *str, pthread_mutex_t *send_mes);
-void	ft_putstr_fd(char *s, int fd);
+int 	ft_putstr_fd(char *s, int fd);
 void	ft_putnbr_fd(long int n, int fd);
 
 #endif
