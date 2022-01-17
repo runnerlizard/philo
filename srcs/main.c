@@ -50,114 +50,98 @@ static long int get_time()
 	return (0);
 }
 
-static void	*routine(void *ph)
+static void	*routine(void *a)
 {	
-	int		p_num;
-	t_philo *local;
+	int		id;
+	t_args	*local;
 
-	local = (t_philo *)ph;
-	p_num = local->p_num + 1;
-	local->last_meal[p_num] = get_time();
+	local = (t_args *)a;
+	id = local->id - 1;
+	local->p[id].last_meal = get_time();
+	
+
+	ft_putnbr_fd(id + 1, 1);
+	ft_putstr_fd(" started\n", 1);
 	while (1)
 	{
-		message(get_time(), p_num, " is thinking\n", &local->send_mes);
-		if (p_num % 2 == 0)
+		message(get_time(), id + 1, " is thinking\n", &local->send_mes);
+		if (id % 2 == 0)
 			usleep(local->eat_time / 2);
 		else
 			usleep(10);
-		pthread_mutex_lock(&local->fork[p_num]);
-		if (p_num == local->n)
-		{
-			//ft_putstr_fd("waiting first\n", 1);
-			pthread_mutex_lock(&local->fork[1]);
-		}
+		pthread_mutex_lock(&local->p[id].fork);
+		if (id == local->n - 1)
+			pthread_mutex_lock(&local->p[1].fork);
 		else
-		{
-			//ft_putstr_fd("waiting mine\n", 1);
-			pthread_mutex_lock(&local->fork[p_num + 1]);
-		}
+			pthread_mutex_lock(&local->p[id + 1].fork);
 		usleep(10);
-		if (get_time() - local->last_meal[p_num] > local->die_time)
+		if (get_time() - local->p[id].last_meal > local->die_time)
 		{
-			message(get_time(), p_num, " died\n", &local->send_mes);
-			pthread_mutex_unlock(&local->fork[p_num]);
-			if (p_num == local->n)
-				pthread_mutex_unlock(&local->fork[1]);
+			message(get_time(), id + 1, " died\n", &local->send_mes);
+			pthread_mutex_unlock(&local->p[id].fork);
+			if (id == local->n - 1)
+				pthread_mutex_unlock(&local->p[1].fork);
 			else
-				pthread_mutex_unlock(&local->fork[p_num + 1]);
+				pthread_mutex_unlock(&local->p[id + 1].fork);
 			return (NULL);
 		}
-		local->last_meal[p_num] = get_time();
-		message(get_time(), p_num, " has taken a fork\n", &local->send_mes);
-		message(get_time(), p_num, " is eating\n", &local->send_mes);
+		local->p[id].last_meal = get_time();
+		message(get_time(), id + 1, " has taken a fork\n", &local->send_mes);
+		message(get_time(), id + 1, " is eating\n", &local->send_mes);
 		usleep(local->eat_time * 1000);
-		pthread_mutex_unlock(&local->fork[p_num]);
-		if (p_num == local->n)
-		{
-			//ft_putstr_fd("last philo\n", 1);
-			pthread_mutex_unlock(&local->fork[1]);
-		}
+		pthread_mutex_unlock(&local->p[id].fork);
+		if (id == local->n - 1)
+			pthread_mutex_unlock(&local->p[1].fork);
 		else
-		{
-			//ft_putstr_fd("not last philo\n", 1);
-			pthread_mutex_unlock(&local->fork[p_num + 1]);
-		}
-		message(get_time(), p_num, " is sleeping\n", &local->send_mes);
+			pthread_mutex_unlock(&local->p[id].fork);
+		message(get_time(), id + 1, " is sleeping\n", &local->send_mes);
 		usleep(local->sleep_time * 1000);
 	}
 	return (NULL);
 }
 
-static int check_args(t_philo *ph, int argc, char **argv)
+static int check_args(int argc, char **argv, t_args *a)
 {
-	if (!(ph->fork = (pthread_mutex_t*)malloc(sizeof(*(ph->fork)) * ph->n)))
-		return (ft_putstr_fd("Malloc error for mutex\n", 1));
 	if ((argc != 6) && (argc != 5))
 		return (ft_putstr_fd("Invalid arguments number. Must be 5 or 4\n", 1));
-	if (!(ph->last_meal = (int*)malloc(sizeof(*(ph->last_meal)) * ph->n)))
-		return (1);
-	ph->n = ft_atoi(argv[1]);
-	ph->die_time = ft_atoi(argv[2]);
-	ph->eat_time = ft_atoi(argv[3]);
-	ph->sleep_time = ft_atoi(argv[4]);
-	ph->number = -1;
+	a->n = ft_atoi(argv[1]);
+	a->die_time = ft_atoi(argv[2]);
+	a->eat_time = ft_atoi(argv[3]);
+	a->sleep_time = ft_atoi(argv[4]);
+	a->number = -1;
 	if (argc == 6)
-		ph->number = ft_atoi(argv[5]);
-	if ((ph->n < 1) || (ph->die_time < 0) || (ph->eat_time < 0) || (ph->sleep_time < 0) || ( (argc == 6) && (ph->number < 0)))
+		a->number = ft_atoi(argv[5]);
+	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0) || (a->sleep_time < 0) || ( (argc == 6) && (a->number < 0)))
 		return (ft_putstr_fd("Invalid arguments.\n", 1));
 	return (0);
 }
 
 int main (int argc, char *argv[])
 {
-	pthread_t		*t;
-	t_philo			*ph;
-	int				i;
+	t_args	a;
+	int		i;
 	
-	if ((!(ph = malloc(sizeof(t_philo)))) || (check_args(ph, argc, argv) != 0))
+	if (check_args(argc, argv, &a) != 0)
 		return (1);
-	ft_putstr_fd("here\n", 1);
+	pthread_mutex_init(&a.send_mes, NULL);
+	if (!(a.p = malloc(sizeof(t_philo) * a.n)))
+		return (ft_putstr_fd("Malloc error\n", 1));
 	i = 0;
-	while (i <= ph->n)
-		pthread_mutex_init(&ph->fork[i++], NULL);
-	ft_putstr_fd("here1\n", 1);
-	pthread_mutex_init(&ph->send_mes, NULL);
-	ft_putstr_fd("here2\n", 1);
-	ft_putnbr_fd(ph->n, 1);
-	if (!(t = (pthread_t *)malloc(sizeof(t) * ph->n)))
-		return (printf("Malloc error for pthread.\n"));
-	ft_putstr_fd("here3\n", 1);
-	i = -1;
+	while (i < a.n)
+		pthread_mutex_init(&a.p[i++].fork, NULL);
 	get_time();
-	while (++i < ph->n)
+	i = -1;
+	while (++i < a.n)
 	{
-		ph->p_num = i;
-		if (pthread_create(t + i, NULL, &routine, ph) != 0)
+		a.id = i + 1;
+		if (pthread_create(&a.p[i].t, NULL, &routine, &a) != 0)
 			return (printf("pthread_create error!\n"));
-		usleep(10);
+		usleep(1000);
 	}
 	usleep(100000000);
-/*	while (j-- > 0)
+	return (argc);
+}
+	/*	while (j-- > 0)
 	{
 		printf("joined %d\n", i[0] - j);
 		if (pthread_join(t[j], NULL) != 0)
@@ -165,5 +149,3 @@ int main (int argc, char *argv[])
 		usleep(10);
 	}*/
 
-	return (argc);
-}
