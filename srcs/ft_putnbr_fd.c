@@ -1,4 +1,4 @@
-#include "philo.h"
+#include "../include/philo.h"
 
 static long int	ft_abs1(long int n)
 {

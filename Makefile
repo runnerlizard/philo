@@ -1,22 +1,25 @@
 NAME = philo
 NAME_BONUS = philo_bonus
 
-SRC = philo.c message.c ft_putnbr_fd.c
+SRC = srcs/main.c srcs/message.c srcs/ft_putnbr_fd.c
 SRC_BONUS = ./philo_bonus/philo_bonus.c message.c ft_putnbr_fd.c
+
+HEADER = ./include/
+HEADER_BONUS = ./bonus/include
 
 OBJ = $(SRC:.c=.o)
 OBJ_BONUS = $(SRC_BONUS:.c=.o)
 
 FLAGS = -Wall -Werror -Wextra -O2
 
-all: $(NAME) philo.h
+all: $(NAME) $(HEADER)
 
-bonus: $(NAME_BONUS) philo.h
+bonus: $(NAME_BONUS) $(HEADER_BONUS)
 
-$(NAME): $(OBJ) Makefile philo.h 
+$(NAME): $(OBJ) $(HEADER)
 	gcc $(OBJ) -o $(NAME) -pthread
 
-$(NAME_BONUS): $(OBJ_BONUS) Makefile philo.h 
+$(NAME_BONUS): $(OBJ_BONUS) $(HEADER_BONUS)
 	gcc $(OBJ_BONUS) -o $(NAME_BONUS) -pthread
 
 %.o:	%.c
@@ -30,4 +33,6 @@ fclean:	clean
 
 re: fclean all
 
-.PHONY: clean fclean all re
+re_bonus: fclean bonus
+
+.PHONY: clean fclean all re re_bonus
