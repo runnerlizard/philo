@@ -50,47 +50,76 @@ static long int get_time()
 	return (0);
 }
 
+static void *handle_forks(void *ph)
+{
+	t_p	*b;
+
+	b = (t_p *)ph;
+	while (b->a->p[b->id].right < 0)
+	{
+		pthread_mutex_lock(&b->a->p[b->r].fork);
+		b->a->p[b->id].right = 1;
+		if (b->a->p[b->id].left < 0)
+		{
+			pthread_mutex_unlock(&b->a->p[b->r].fork);
+			b->a->p[b->id].right = -1;
+			usleep (100);
+			continue;
+		}
+	}
+	return(NULL);
+}
+
 static void	*routine(void *a)
 {	
-	int		id;
-	t_args	*local;
+	t_p	ph;
 
-	local = (t_args *)a;
-	id = local->id - 1;
-	local->p[id].last_meal = get_time();
+	ph.a = (t_args *)a;
+	ph.id = ph.a->tmp_id;
+	ph.a->p[ph.id].left = -1;
+	ph.a->p[ph.id].right = -1;
+	if (ph.id == ph.a->n - 1)
+		ph.r = 0;
+	else
+		ph.r = ph.id + 1;
+	//message(ph.id, ph.r, " ===================forks\n", &ph.a->send_mes);
+	ph.a->p[ph.id].last_meal = get_time();
 	while (1)
 	{
-		message(get_time(), id + 1, " is thinking\n", &local->send_mes);
-		if (id % 2 == 0)
-			usleep(local->eat_time / 2);
-		pthread_mutex_lock(&local->p[id].fork);
-		if (id == local->n - 1)
-			pthread_mutex_lock(&local->p[0].fork);
-		else
-			pthread_mutex_lock(&local->p[id + 1].fork);
-		usleep(10);
-		if (local->p[id].last_meal - get_time() > local->die_time)
+		message(get_time(), ph.id + 1, " is thinking\n", &ph.a->send_mes);
+		pthread_create(&ph.a->p[ph.id].second_fork, NULL, &handle_forks, &ph);
+		//message(ph.id + 1, ph.r + 1, " =====================================\n", &ph.a->send_mes);
+		//message(ph.id + 1, ph.id + 1, " =====================================\n", &ph.a->send_mes);
+		while (ph.a->p[ph.id].left < 0)
 		{
-			message(get_time(), id + 1, " died\n", &local->send_mes);
-			pthread_mutex_unlock(&local->p[id].fork);
-			if (id == local->n - 1)
-				pthread_mutex_unlock(&local->p[0].fork);
-			else
-				pthread_mutex_unlock(&local->p[id + 1].fork);
+			pthread_mutex_lock(&ph.a->p[ph.id].fork);
+			ph.a->p[ph.id].left = 1;
+			if (ph.a->p[ph.id].right < 0)
+			{
+				pthread_mutex_unlock(&ph.a->p[ph.id].fork);
+				pthread_mutex_unlock(&ph.a->p[ph.id].fork);
+				ph.a->p[ph.id].left = -1;
+				usleep (100);
+				continue;
+			}
+		}
+		if (ph.a->p[ph.id].last_meal - get_time() > ph.a->die_time)
+		{
+			message(get_time(), ph.id + 1, " died\n", &ph.a->send_mes);
+			pthread_mutex_unlock(&ph.a->p[ph.id].fork);
+			pthread_mutex_unlock(&ph.a->p[ph.r].fork);
 			return (NULL);
 		}
-		local->p[id].last_meal = get_time();
-		message(get_time(), id + 1, " has taken a fork\n", &local->send_mes);
-		message(get_time(), id + 1, " is eating\n", &local->send_mes);
-		usleep(local->eat_time * 1000);
-		pthread_mutex_unlock(&local->p[id].fork);
-		if (id == local->n - 1)
-			pthread_mutex_unlock(&local->p[0].fork);
-		else
-			pthread_mutex_unlock(&local->p[id + 1].fork);
-		
-		message(get_time(), id + 1, " is sleeping\n", &local->send_mes);
-		usleep(local->sleep_time * 1000);
+		ph.a->p[ph.id].last_meal = get_time();
+		message(get_time(), ph.id + 1, " has taken a fork\n", &ph.a->send_mes);
+		message(get_time(), ph.id + 1, " is eating\n", &ph.a->send_mes);
+		usleep(ph.a->eat_time * 1000);
+		pthread_mutex_unlock(&ph.a->p[ph.id].fork);
+		ph.a->p[ph.id].left = -1;
+		pthread_mutex_unlock(&ph.a->p[ph.r].fork);
+		ph.a->p[ph.id].right = -1;
+		message(get_time(), ph.id + 1, " is sleeping\n", &ph.a->send_mes);
+		usleep(ph.a->sleep_time * 1000);
 	}
 	return (NULL);
 }
@@ -128,7 +157,7 @@ int main (int argc, char *argv[])
 	i = -1;
 	while (++i < a.n)
 	{
-		a.id = i + 1;
+		a.tmp_id = i;
 		if (pthread_create(&a.p[i].t, NULL, &routine, &a) != 0)
 			return (printf("pthread_create error!\n"));
 		usleep(1000);
