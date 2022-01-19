@@ -12,12 +12,24 @@ int	ft_putstr_fd(char *s, int fd)
     return (i);
 }
 
-void message(long int ms, int n, char *str, pthread_mutex_t *send_mes)
+size_t	ft_strlen(const char *str)
+{
+	size_t	i;
+
+	i = 0;
+	while (str[i])
+		i++;
+	return (i);
+}
+
+void message(long int us, int n, char *str, pthread_mutex_t *send_mes)
 {
     pthread_mutex_lock(send_mes);
-    ft_putnbr_fd(ms, 1);
+    ft_putnbr_fd(us / 1000, 1);
     ft_putstr_fd(" ", 1);
     ft_putnbr_fd(n, 1);
     ft_putstr_fd(str, 1);
+    if (ft_strlen(str) == 6)
+        exit (1);
     pthread_mutex_unlock(send_mes);
 }

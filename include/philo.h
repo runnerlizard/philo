@@ -12,7 +12,7 @@ typedef struct		s_philo
     pthread_mutex_t	fork;
     pthread_t       t;
     int             last_meal;
-    pthread_t       second_fork;
+    pthread_t       die_check;
     int             left;
     int             right;
 }					t_philo;
@@ -37,8 +37,9 @@ typedef struct		s_p
 }					t_p;
 
 int     ft_atoi(char const *str);
-void    message(long int ms, int n, char *str, pthread_mutex_t *send_mes);
+void    message(long int us, int n, char *str, pthread_mutex_t *send_mes);
 int 	ft_putstr_fd(char *s, int fd);
 void	ft_putnbr_fd(long int n, int fd);
+size_t  ft_strlen(const char *str);
 
 #endif
