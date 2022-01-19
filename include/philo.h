@@ -13,8 +13,6 @@ typedef struct		s_philo
     pthread_t       t;
     int             last_meal;
     pthread_t       die_check;
-    int             left;
-    int             right;
 }					t_philo;
 
 typedef struct		s_args
@@ -25,7 +23,9 @@ typedef struct		s_args
 	int             eat_time;
     int             sleep_time;
     int             number;
+    pthread_mutex_t *meal_or_die;
     pthread_mutex_t send_mes;
+    pthread_t       finish;
     t_philo         *p;
 }					t_args;
 
@@ -33,6 +33,7 @@ typedef struct		s_p
 {
     int             id;
     int             r;
+    int             meals;
     t_args          *a;
 }					t_p;
 

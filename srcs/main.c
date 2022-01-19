@@ -1,35 +1,6 @@
 #include "../include/philo.h"
 
 
-int	ft_atoi(const char *str)
-{
-	size_t	i;
-	size_t	a;
-	int		sign;
-
-	i = 0;
-	sign = 1;
-	a = 0;
-	while (((str[i] >= 9) && (str[i] <= 13)) || (str[i] == ' '))
-		i++;
-	if ((str[i] == '+') || (str[i] == '-'))
-	{
-		if (str[i] == '-')
-			sign = -1;
-		i++;
-	}
-	while ((str[i] >= 48) & (str[i] <= 57) & (a < 9999999999))
-	{
-		a = (a * 10) + (str[i] - 48);
-		i++;
-	}
-	if ((a > 2147483648) && (sign == -1))
-		return (0);
-	if ((a > 2147483648) || ((a == 2147483648) && (sign == 1)))
-		return (-1);
-	return (a * sign);
-}
-
 static long int get_time()
 {
 	static struct timeval	tv1;
@@ -58,7 +29,10 @@ static void *die_die_die_my_darling(void *ph)
 	while (1)
 	{
 		if (b->a->die_time < get_time() - b->a->p[b->id].last_meal)
+		{
+			pthread_mutex_unlock(&b->a->meal_or_die[b->id]);
 			message(get_time(), b->id + 1, " died\n", &b->a->send_mes);
+		}
 		usleep(5);
 	}
 	return(NULL);
@@ -79,6 +53,7 @@ static void	*routine(void *a)
 
 	ph.a = (t_args *)a;
 	ph.id = ph.a->tmp_id;
+	ph.meals = ph.a->number;
 	if (ph.id == ph.a->n - 1)
 		ph.r = 0;
 	else
@@ -109,6 +84,9 @@ static void	*routine(void *a)
 		ph.a->p[ph.id].last_meal = get_time();
 		message(get_time(), ph.id + 1, " has taken a fork\n", &ph.a->send_mes);
 		message(get_time(), ph.id + 1, " is eating\n", &ph.a->send_mes);
+		ph.meals--;
+		if (ph.meals == 0)
+			pthread_mutex_unlock(&ph.a->meal_or_die[b->id]);
 		ft_usleep(ph.a->eat_time);
 		if (ph.id % 2 != 0)
 		{
@@ -142,12 +120,32 @@ static int check_create_args(int argc, char **argv, t_args *a)
 		return (ft_putstr_fd("Invalid arguments.\n", 1));
 	pthread_mutex_init(&a->send_mes, NULL);
 	if (!(a->p = malloc(sizeof(t_philo) * a->n)))
-		return (ft_putstr_fd("Malloc error\n", 1));
+		return (ft_putstr_fd("Malloc error1\n", 1));
+	if (!(a->meal_or_die = malloc(sizeof(pthread_mutex_t) * a->n)))
+		return (ft_putstr_fd("Malloc error2\n", 1));
 	i = 0;
 	while (i < a->n)
+	{
+		pthread_mutex_init(&a->meal_or_die[i], NULL);
 		pthread_mutex_init(&a->p[i++].fork, NULL);
+	}
 	get_time();
 	return (0);
+}
+
+static void	*finisher(void *a)
+{
+	int	i;
+	t_p	ph;
+
+	ph.a = (t_args *)a;
+	i = 0;
+	while (i < ph.n)
+		pthread_mutex_lock(&ph.a->die_or_meal[i++]);
+		i = 0;
+	while (i < ph.n)
+		pthread_mutex_lock(&ph.a->die_or_meal[i++]);
+	//destroy all, join all, free all
 }
 
 int main (int argc, char *argv[])
@@ -157,6 +155,8 @@ int main (int argc, char *argv[])
 	
 	if (check_create_args(argc, argv, &a) != 0)
 		return (1);
+	if (pthread_create(&a.finish, NULL, &finisher, &a) != 0)
+		return (printf("pthread_create error!\n"));
 	i = 1;
 	while (i < a.n)
 	{

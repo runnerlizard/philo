@@ -1,20 +1,32 @@
 #include "../include/philo.h"
 
-static long int	ft_abs1(long int n)
+int	ft_atoi(const char *str)
 {
-	if (n < 0)
-		n = -n;
-	return (n);
-}
+	size_t	i;
+	size_t	a;
+	int		sign;
 
-static void	ft_write_small(int fd, long int n)
-{
-	char	res;
-	int		j;
-
-	j = 0;
-	res = n + 48;
-	j = j + write(fd, &res, 1);
+	i = 0;
+	sign = 1;
+	a = 0;
+	while (((str[i] >= 9) && (str[i] <= 13)) || (str[i] == ' '))
+		i++;
+	if ((str[i] == '+') || (str[i] == '-'))
+	{
+		if (str[i] == '-')
+			sign = -1;
+		i++;
+	}
+	while ((str[i] >= 48) & (str[i] <= 57) & (a < 9999999999))
+	{
+		a = (a * 10) + (str[i] - 48);
+		i++;
+	}
+	if ((a > 2147483648) && (sign == -1))
+		return (0);
+	if ((a > 2147483648) || ((a == 2147483648) && (sign == 1)))
+		return (-1);
+	return (a * sign);
 }
 
 static void	ft_write_big(int fd, long int n)
@@ -47,9 +59,13 @@ void	ft_putnbr_fd(long int n, int fd)
 		res = '-';
 		j = j + write(fd, &res, 1);
 	}
-	n1 = ft_abs1(n);
-	if (n1 > 9)
-		ft_write_big(fd, n1);
+	if (n < 0)
+		n = - n;
+	if (n > 9)
+		ft_write_big(fd, n);
 	else
-		ft_write_small(fd, n1);
+	{
+		res = n + 48;
+		write(fd, &res, 1);
+	}
 }
