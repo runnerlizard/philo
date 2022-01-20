@@ -1,5 +1,5 @@
-#include "../include/philo.h"
-
+#include "../include/philo_bonus.h"
+/*
 void *die_my_darling(void *ph)
 {
 	t_philo	*a;
@@ -47,11 +47,42 @@ static int	launch_threads(t_philo *p, t_args *a)
 	}
 	return (i);
 }
+*/
+static int launch_philos(t_args *ph)
+{
+	t_args	*a;
+	int		i;
+	
+	i = -1;
+	while (++i < a->n)
+	{
+		ft_putnbr_fd(i, 1);
+		ft_putstr_fd("new fork\n", 1);
+		child_pid[i] = fork();
+		if (child_pid[i] == 0)
+		{
+			ft_putnbr_fd(child_pid[i], 1);
+			ft_putstr_fd("hello\n", 1);
+			return (0);
+		}
+		else if (child_pid[i] > 0)
+		{
+			ft_putnbr_fd(child_pid[i], 1);
+			ft_putstr_fd("hello\n", 1);
+			return (0);
+		}
+		else
+		{
+			free(a);
+			return (ft_putstr_fd("Fork error1\n", 1));
+		}
+	}
+	return (0);
+	 
+}
 
 static int check_create_args(int argc, char **argv, t_args *a)
 {	
-	int	i;
-
 	if ((argc != 6) && (argc != 5))
 		return (ft_putstr_fd("Invalid arguments number. Must be 5 or 4\n", 1));
 	a->n = ft_atoi(argv[1]);
@@ -63,13 +94,9 @@ static int check_create_args(int argc, char **argv, t_args *a)
 		a->number = ft_atoi(argv[5]);
 	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0) || (a->sleep_time < 0) || ( (argc == 6) && (a->number < 0)))
 		return (ft_putstr_fd("Invalid arguments.\n", 1));
-	a->send_mes = 1;
-	i = 0;
-	a->forks = malloc(sizeof(pthread_mutex_t) * a->n);
-	if (a->forks == NULL)
-		return (ft_putstr_fd("Malloc error\n", 1));
-	while (i < a->n)
-		pthread_mutex_init(&a->forks[i++], NULL);
+	a->forks = sem_open("/forks", O_CREAT, 0664, a->n);
+	if (a->forks == SEM_FAILED)
+		return (ft_putstr_fd("Semaphore error.\n", 1));
 	get_time();
 	return (0);
 }
@@ -77,26 +104,46 @@ static int check_create_args(int argc, char **argv, t_args *a)
 int main (int argc, char *argv[])
 {
 	t_args	*a;
-	t_philo	*p;
+	pid_t	main_pid;
+	pid_t	*child_pid;
 	int		i;
 	
+	child_pid = malloc(sizeof(pid_t) * a->n);
 	a = malloc(sizeof(t_args));
 	if (a == NULL)
 		return (ft_putstr_fd("Malloc error1\n", 1));
 	if (check_create_args(argc, argv, a) != 0)
-		return (1);
-	if (!(p = malloc(sizeof(t_philo) * a->n)))
-		return (ft_putstr_fd("Malloc error2\n", 1));
-	i = launch_threads(p, a);
-	if (i < 0)
-		return (1);
-	while (--i >= 0)
 	{
-		pthread_join(p[i].t, NULL);
-		pthread_mutex_destroy(&a->forks[i]);
+		free(a);
+		return (1);
 	}
-	free(a->forks);
-	free(a);
-	free(p);
-	return (argc);
+	i = 0;
+	main_pid = fork();
+	if (main_pid == 0)
+	{
+		while (i < a->n)
+		{
+			fork
+		}
+	}
+	else if (main_pid > 0)
+	{
+		i = 0;
+		while (i++ < a->n)
+			if (wait(NULL) != -1)
+			{
+				sem_destroy(a->forks);
+				free(a);
+				return (0);
+			}
+		sem_destroy(a->forks);
+		free(a);
+		return (1);
+	}
+	else 
+	{
+		sem_destroy(a-> forks);
+		free(a);
+		return (ft_putstr_fd("Fork error1\n", 1));
+	}
 }
