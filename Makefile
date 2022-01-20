@@ -1,8 +1,8 @@
 NAME = philo
 NAME_BONUS = philo_bonus
 
-SRC = srcs/main.c srcs/message.c srcs/ft_putnbr_fd.c
-SRC_BONUS = ./philo_bonus/philo_bonus.c message.c ft_putnbr_fd.c
+SRC = srcs/main.c srcs/ft_utils.c srcs/activities.c
+SRC_BONUS = ./philo_bonus/philo_bonus.c
 
 HEADER = ./include/
 HEADER_BONUS = ./bonus/include
