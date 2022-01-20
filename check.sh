@@ -4,7 +4,18 @@ printf "\n\n\n\n\n"
 
 make
 
-#1==================without infile and outfile
 
-./philo 5 3100 1000 1000 9
-#valgrind --leak-check=full --show-leak-kinds=all ./philo infile "grgh" "hjkfhk" outfile 
+
+
+#./philo 1 800 200 200 
+
+#./philo 5 800 200 200 7 
+
+#./philo 4 410 200 200
+
+#./philo 4 310 200 100
+
+
+
+valgrind --leak-check=full --show-leak-kinds=all ./philo 1 800 200 200 
+

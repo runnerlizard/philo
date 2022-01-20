@@ -1,7 +1,7 @@
 #include "../include/philo.h"
 
 
-static long int get_time()
+long int get_time()
 {
 	static struct timeval	tv1;
 	struct timeval			tv2;
@@ -21,92 +21,89 @@ static long int get_time()
 	return (0);
 }
 
-static void *die_die_die_my_darling(void *ph)
+static void *die_my_darling(void *ph)
 {
-	t_p	*b;
+	t_philo	*a;
 
-	b = (t_p *)ph;
+	a = (t_philo *)ph;
 	while (1)
 	{
-		if (b->a->die_time < get_time() - b->a->p[b->id].last_meal)
+		if (a->ar->die_time < get_time() - a->last_meal)
 		{
-			pthread_mutex_unlock(&b->a->meal_or_die[b->id]);
-			message(get_time(), b->id + 1, " died\n", &b->a->send_mes);
+			message(a, " died\n");
+			a->dead = 1;
+			pthread_mutex_unlock(&a->ar->forks[a->r]);
+			pthread_mutex_unlock(&a->ar->forks[a->id]);
+			return (0);
 		}
+		if (a->meals == 0)
+			return (0);
 		usleep(5);
 	}
 	return(NULL);
 }
 
-static void ft_usleep(int us)
-{
-	unsigned int	timer;
-
-	timer = get_time();
-	while (get_time() - timer < us)
-		usleep(10);
-}
-
-static void	*routine(void *a)
+static void	*routine(void *ph)
 {	
-	t_p	ph;
+	t_philo	*a;
 
-	ph.a = (t_args *)a;
-	ph.id = ph.a->tmp_id;
-	ph.meals = ph.a->number;
-	if (ph.id == ph.a->n - 1)
-		ph.r = 0;
+	a = (t_philo *)ph;
+	message(a, " is thinking\n");
+	a->last_meal = get_time();
+	pthread_create(&a->die_check, NULL, &die_my_darling, a);
+	if (a->ar->n % 2 == 0)
+		usleep((a->id % 2) * a->ar->eat_time / 2);
 	else
-		ph.r = ph.id + 1;
-
-
+		usleep((a->id % 3) * a->ar->eat_time);
 	
-
-
-
-	ph.a->p[ph.id].last_meal = get_time();
-	pthread_create(&ph.a->p[ph.id].die_check, NULL, &die_die_die_my_darling, &ph);
-	while (1)
+	
+	while (a->dead == 0)
 	{
-		message(get_time(), ph.id + 1, " is thinking\n", &ph.a->send_mes);
-		if (ph.a->n % 2 != 0)
-			ft_usleep(ph.a->eat_time * 2 - ph.a->sleep_time);
-		if (ph.id % 2 == 0)
+		if (a->id % 2 == 0)
 		{
-			pthread_mutex_lock(&ph.a->p[ph.r].fork);
-			pthread_mutex_lock(&ph.a->p[ph.id].fork);
+			pthread_mutex_lock(&a->ar->forks[a->id]);
+			pthread_mutex_lock(&a->ar->forks[a->r]);
 		}
 		else
 		{
-			pthread_mutex_lock(&ph.a->p[ph.id].fork);
-			pthread_mutex_lock(&ph.a->p[ph.r].fork);
+			pthread_mutex_lock(&a->ar->forks[a->r]);
+			pthread_mutex_lock(&a->ar->forks[a->id]);
 		}
-		ph.a->p[ph.id].last_meal = get_time();
-		message(get_time(), ph.id + 1, " has taken a fork\n", &ph.a->send_mes);
-		message(get_time(), ph.id + 1, " is eating\n", &ph.a->send_mes);
-		ph.meals--;
-		if (ph.meals == 0)
-			pthread_mutex_unlock(&ph.a->meal_or_die[b->id]);
-		ft_usleep(ph.a->eat_time);
-		if (ph.id % 2 != 0)
+		a->last_meal = get_time();
+		message(a, " has taken a fork\n");
+		message(a, " is eating\n");
+		usleep(a->ar->eat_time);
+		if (a->id % 2 != 0)
 		{
-			pthread_mutex_unlock(&ph.a->p[ph.r].fork);
-			pthread_mutex_unlock(&ph.a->p[ph.id].fork);
+			pthread_mutex_unlock(&a->ar->forks[a->r]);
+			pthread_mutex_unlock(&a->ar->forks[a->id]);
 		}
 		else
 		{
-			pthread_mutex_unlock(&ph.a->p[ph.id].fork);
-			pthread_mutex_unlock(&ph.a->p[ph.r].fork);
+			pthread_mutex_unlock(&a->ar->forks[a->id]);
+			pthread_mutex_unlock(&a->ar->forks[a->r]);
 		}
-		message(get_time(), ph.id + 1, " is sleeping\n", &ph.a->send_mes);
-		ft_usleep(ph.a->sleep_time);
+		a->meals--;
+		if (a->meals == 0)
+		{
+			a->ar->joined++;
+			pthread_join(a->die_check, NULL);
+			return (0);
+		}
+		message(a, " is sleeping\n");
+		usleep(a->ar->sleep_time);
+		message(a, " is thinking\n");
+		if (a->ar->n % 2 != 0)
+			usleep(a->ar->eat_time * 2 - a->ar->sleep_time);
 	}
+	pthread_join(a->die_check, NULL);
 	return (NULL);
 }
 
 static int check_create_args(int argc, char **argv, t_args *a)
-{
+{	
 	int	i;
+
 	if ((argc != 6) && (argc != 5))
 		return (ft_putstr_fd("Invalid arguments number. Must be 5 or 4\n", 1));
 	a->n = ft_atoi(argv[1]);
@@ -114,68 +111,62 @@ static int check_create_args(int argc, char **argv, t_args *a)
 	a->eat_time = ft_atoi(argv[3]) * 1000;
 	a->sleep_time = ft_atoi(argv[4]) * 1000;
 	a->number = -1;
+
+	a->joined = 0;
+
 	if (argc == 6)
 		a->number = ft_atoi(argv[5]);
 	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0) || (a->sleep_time < 0) || ( (argc == 6) && (a->number < 0)))
 		return (ft_putstr_fd("Invalid arguments.\n", 1));
-	pthread_mutex_init(&a->send_mes, NULL);
-	if (!(a->p = malloc(sizeof(t_philo) * a->n)))
-		return (ft_putstr_fd("Malloc error1\n", 1));
-	if (!(a->meal_or_die = malloc(sizeof(pthread_mutex_t) * a->n)))
-		return (ft_putstr_fd("Malloc error2\n", 1));
+	a->send_mes = 1;
 	i = 0;
+	a->forks = malloc(sizeof(pthread_mutex_t) * a->n);
+	if (a->forks == NULL)
+		return (ft_putstr_fd("Malloc error\n", 1));
 	while (i < a->n)
-	{
-		pthread_mutex_init(&a->meal_or_die[i], NULL);
-		pthread_mutex_init(&a->p[i++].fork, NULL);
-	}
+		pthread_mutex_init(&a->forks[i++], NULL);
 	get_time();
 	return (0);
 }
 
-static void	*finisher(void *a)
-{
-	int	i;
-	t_p	ph;
-
-	ph.a = (t_args *)a;
-	i = 0;
-	while (i < ph.n)
-		pthread_mutex_lock(&ph.a->die_or_meal[i++]);
-		i = 0;
-	while (i < ph.n)
-		pthread_mutex_lock(&ph.a->die_or_meal[i++]);
-	//destroy all, join all, free all
-}
-
 int main (int argc, char *argv[])
 {
-	t_args	a;
+	t_args	*a;
+	t_philo	*p;
 	int		i;
 	
-	if (check_create_args(argc, argv, &a) != 0)
+	a = malloc(sizeof(t_args));
+	if (a == NULL)
 		return (1);
-	if (pthread_create(&a.finish, NULL, &finisher, &a) != 0)
-		return (printf("pthread_create error!\n"));
-	i = 1;
-	while (i < a.n)
+	if (check_create_args(argc, argv, a) != 0)
+		return (1);
+	if (!(p = malloc(sizeof(t_philo) * a->n)))
+		return (ft_putstr_fd("Malloc error1\n", 1));
+	i = 0;
+	while (i < a->n)
 	{
-		a.tmp_id = i;
-		if (pthread_create(&a.p[i].t, NULL, &routine, &a) != 0)
-			return (printf("pthread_create error!\n"));
-		ft_usleep(500);
-		i += 2;
-		if (((i == a.n + 1) || (i == a.n)) && (i % 2 == 1))
-			i = 0;
+		p[i].id = i;
+		if (i == a->n - 1)
+			p[i].r = 0;
+		else
+			p[i].r = i + 1;
+		p[i].dead = 0;
+		p[i].meals = a->number;
+		p[i].ar = a;
+		if (pthread_create(&p[i].t, NULL, &routine, &p[i]) != 0)
+			return (ft_putstr_fd("pthread_create error!\n", 1));
+		i++;
 	}
-	usleep(100000000);
+	while (--i >= 0)
+	{
+		pthread_join(p[i].t, NULL);
+		a->joined++;
+		pthread_mutex_destroy(&a->forks[i]);
+	}
+	ft_putnbr_fd(a->joined, 1);
+	ft_putstr_fd("\n\n", 1);
+	free(a->forks);
+	free(a);
+	free(p);
 	return (argc);
 }
-	/*	while (j-- > 0)
-	{
-		printf("joined %d\n", i[0] - j);
-		if (pthread_join(t[j], NULL) != 0)
-			return (printf("pthread_join error!\n"));
-		usleep(10);
-	}*/
-

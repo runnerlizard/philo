@@ -49,7 +49,6 @@ static void	ft_write_big(int fd, long int n)
 
 void	ft_putnbr_fd(long int n, int fd)
 {
-	long int	n1;
 	int			j;
 	char		res;
 
@@ -66,6 +65,6 @@ void	ft_putnbr_fd(long int n, int fd)
 	else
 	{
 		res = n + 48;
-		write(fd, &res, 1);
+		j = j + write(fd, &res, 1);
 	}
 }

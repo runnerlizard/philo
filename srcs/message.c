@@ -22,14 +22,27 @@ size_t	ft_strlen(const char *str)
 	return (i);
 }
 
-void message(long int us, int n, char *str, pthread_mutex_t *send_mes)
+int message(t_philo *ph, char *str)
 {
-    pthread_mutex_lock(send_mes);
-    ft_putnbr_fd(us / 1000, 1);
+    t_philo	    *a;
+    int         i;
+
+	a = (t_philo *)ph;
+    i = 0;
+    while (a->ar->send_mes == 0)
+    {
+        usleep(10);
+        if (a->dead == 1)
+            return (1);
+        if (i++ > 100)
+            return (1);
+    }
+    a->ar->send_mes = 0;
+    ft_putnbr_fd(get_time() / 1000, 1);
     ft_putstr_fd(" ", 1);
-    ft_putnbr_fd(n, 1);
+    ft_putnbr_fd(a->id + 1, 1);
     ft_putstr_fd(str, 1);
-    if (ft_strlen(str) == 6)
-        exit (1);
-    pthread_mutex_unlock(send_mes);
+    if (ft_strlen(str) != 6)
+        a->ar->send_mes = 1;
+    return (0);
 }

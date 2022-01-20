@@ -7,40 +7,35 @@
 # include <pthread.h>
 # include <sys/time.h>
 
-typedef struct		s_philo
-{
-    pthread_mutex_t	fork;
-    pthread_t       t;
-    int             last_meal;
-    pthread_t       die_check;
-}					t_philo;
-
 typedef struct		s_args
 {
     int             n;
-    int             tmp_id;
+    int             joined;
 	int             die_time;
 	int             eat_time;
     int             sleep_time;
     int             number;
-    pthread_mutex_t *meal_or_die;
-    pthread_mutex_t send_mes;
-    pthread_t       finish;
-    t_philo         *p;
+    int             send_mes;
+    pthread_mutex_t	*forks; // destroyed freed
 }					t_args;
 
-typedef struct		s_p
+typedef struct		s_philo
 {
     int             id;
     int             r;
+    int             dead;
     int             meals;
-    t_args          *a;
-}					t_p;
+    int             last_meal;
+    pthread_t       t;  //joined
+    pthread_t       die_check; //joined
+    t_args          *ar;
+}					t_philo;
 
-int     ft_atoi(char const *str);
-void    message(long int us, int n, char *str, pthread_mutex_t *send_mes);
-int 	ft_putstr_fd(char *s, int fd);
-void	ft_putnbr_fd(long int n, int fd);
-size_t  ft_strlen(const char *str);
+int         ft_atoi(char const *str);
+int         message(t_philo *ph, char *str);
+int 	    ft_putstr_fd(char *s, int fd);
+void	    ft_putnbr_fd(long int n, int fd);
+size_t      ft_strlen(const char *str);
+long int    get_time();
 
 #endif
