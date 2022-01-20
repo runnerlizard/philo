@@ -1,5 +1,27 @@
 #include "../include/philo.h"
 
+int	ft_putstr_fd(char *s, int fd)
+{
+	size_t	i;
+    int     j;
+
+	i = 0;
+    j = 0;
+	while (s[i])
+		j = j + write (fd, &s[i++], 1);
+    return (i);
+}
+
+size_t	ft_strlen(const char *str)
+{
+	size_t	i;
+
+	i = 0;
+	while (str[i])
+		i++;
+	return (i);
+}
+
 int	ft_atoi(const char *str)
 {
 	size_t	i;

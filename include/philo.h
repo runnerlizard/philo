@@ -36,5 +36,7 @@ int 	    ft_putstr_fd(char *s, int fd);
 void	    ft_putnbr_fd(long int n, int fd);
 size_t      ft_strlen(const char *str);
 long int    get_time();
+void	    *activities(void *ph);
+void        *die_my_darling(void *ph);
 
 #endif
