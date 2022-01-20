@@ -7,7 +7,7 @@ make
 
 
 
-#./philo 1 800 200 200 
+./philo 1 800 200 200 
 
 #./philo 5 800 200 200 7 
 
@@ -17,5 +17,5 @@ make
 
 
 
-valgrind --leak-check=full --show-leak-kinds=all ./philo 1 800 200 200 
+#valgrind --leak-check=full --show-leak-kinds=all ./philo 1 800 200 200 
 

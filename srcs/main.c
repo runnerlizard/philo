@@ -86,7 +86,6 @@ static void	*routine(void *ph)
 		a->meals--;
 		if (a->meals == 0)
 		{
-			a->ar->joined++;
 			pthread_join(a->die_check, NULL);
 			return (0);
 		}
@@ -111,9 +110,6 @@ static int check_create_args(int argc, char **argv, t_args *a)
 	a->eat_time = ft_atoi(argv[3]) * 1000;
 	a->sleep_time = ft_atoi(argv[4]) * 1000;
 	a->number = -1;
-
-	a->joined = 0;
-
 	if (argc == 6)
 		a->number = ft_atoi(argv[5]);
 	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0) || (a->sleep_time < 0) || ( (argc == 6) && (a->number < 0)))
@@ -160,11 +156,8 @@ int main (int argc, char *argv[])
 	while (--i >= 0)
 	{
 		pthread_join(p[i].t, NULL);
-		a->joined++;
 		pthread_mutex_destroy(&a->forks[i]);
 	}
-	ft_putnbr_fd(a->joined, 1);
-	ft_putstr_fd("\n\n", 1);
 	free(a->forks);
 	free(a);
 	free(p);

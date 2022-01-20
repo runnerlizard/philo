@@ -10,7 +10,6 @@
 typedef struct		s_args
 {
     int             n;
-    int             joined;
 	int             die_time;
 	int             eat_time;
     int             sleep_time;
