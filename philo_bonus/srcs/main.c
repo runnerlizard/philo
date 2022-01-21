@@ -49,10 +49,15 @@ static int	launch_threads(t_philo *p, t_args *a)
 }
 */
 
-static int check_create_args(int argc, char **argv, t_args *a)
+static t_args *check_create_args(int argc, char **argv)
 {	
+	t_args	*a;
+
 	if ((argc != 6) && (argc != 5))
-		return (ft_putstr_fd("Invalid arguments number. Must be 5 or 4\n", 1));
+		return (NULL);
+	a = malloc(sizeof(t_args));
+	if (a == NULL)
+		return (NULL);
 	a->n = ft_atoi(argv[1]);
 	a->die_time = ft_atoi(argv[2]) * 1000;
 	a->eat_time = ft_atoi(argv[3]) * 1000;
@@ -61,12 +66,13 @@ static int check_create_args(int argc, char **argv, t_args *a)
 	if (argc == 6)
 		a->number = ft_atoi(argv[5]);
 	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0) || (a->sleep_time < 0) || ( (argc == 6) && (a->number < 0)))
-		return (ft_putstr_fd("Invalid arguments.\n", 1));
-	a->forks = sem_open("/forks", O_CREAT, 0664, a->n);
+		return (NULL);
+	sem_unlink("forks");
+	a->forks = sem_open("forks", O_CREAT, 0664, a->n);
 	if (a->forks == SEM_FAILED)
-		return (ft_putstr_fd("Semaphore error.\n", 1));
+		return (NULL);
 	get_time();
-	return (0);
+	return (a);
 }
 
 int main (int argc, char *argv[])
@@ -75,14 +81,9 @@ int main (int argc, char *argv[])
 	pid_t	*pid;
 	int		i;
 	
-	a = malloc(sizeof(t_args));
+	a = check_create_args(argc, argv);
 	if (a == NULL)
-		return (ft_putstr_fd("Malloc error\n", 1));
-	if (check_create_args(argc, argv, a) != 0)
-	{
-		free(a);
-		return (1);
-	}
+		return (ft_putstr_fd("Args error\n", 1));
 	pid = malloc(sizeof(pid_t) * a->n);
 	if (pid == NULL)
 		return (ft_putstr_fd("Malloc error\n", 1));
