@@ -48,38 +48,6 @@ static int	launch_threads(t_philo *p, t_args *a)
 	return (i);
 }
 */
-static int launch_philos(t_args *ph)
-{
-	t_args	*a;
-	int		i;
-	
-	i = -1;
-	while (++i < a->n)
-	{
-		ft_putnbr_fd(i, 1);
-		ft_putstr_fd("new fork\n", 1);
-		child_pid[i] = fork();
-		if (child_pid[i] == 0)
-		{
-			ft_putnbr_fd(child_pid[i], 1);
-			ft_putstr_fd("hello\n", 1);
-			return (0);
-		}
-		else if (child_pid[i] > 0)
-		{
-			ft_putnbr_fd(child_pid[i], 1);
-			ft_putstr_fd("hello\n", 1);
-			return (0);
-		}
-		else
-		{
-			free(a);
-			return (ft_putstr_fd("Fork error1\n", 1));
-		}
-	}
-	return (0);
-	 
-}
 
 static int check_create_args(int argc, char **argv, t_args *a)
 {	
@@ -104,46 +72,38 @@ static int check_create_args(int argc, char **argv, t_args *a)
 int main (int argc, char *argv[])
 {
 	t_args	*a;
-	pid_t	main_pid;
-	pid_t	*child_pid;
+	pid_t	*pid;
 	int		i;
 	
-	child_pid = malloc(sizeof(pid_t) * a->n);
 	a = malloc(sizeof(t_args));
 	if (a == NULL)
-		return (ft_putstr_fd("Malloc error1\n", 1));
+		return (ft_putstr_fd("Malloc error\n", 1));
 	if (check_create_args(argc, argv, a) != 0)
 	{
 		free(a);
 		return (1);
 	}
-	i = 0;
-	main_pid = fork();
-	if (main_pid == 0)
+	pid = malloc(sizeof(pid_t) * a->n);
+	if (pid == NULL)
+		return (ft_putstr_fd("Malloc error\n", 1));
+	i = -1;
+	while (++i < a->n)
 	{
-		while (i < a->n)
+		pid[i] = fork();
+		if (pid[i] < 0)
+			return (1);
+		if (pid[i] == 0)
 		{
-			fork
+			a->id = i;
+			break ;
 		}
 	}
-	else if (main_pid > 0)
-	{
-		i = 0;
-		while (i++ < a->n)
-			if (wait(NULL) != -1)
-			{
-				sem_destroy(a->forks);
-				free(a);
-				return (0);
-			}
-		sem_destroy(a->forks);
-		free(a);
-		return (1);
-	}
-	else 
-	{
-		sem_destroy(a-> forks);
-		free(a);
-		return (ft_putstr_fd("Fork error1\n", 1));
-	}
+	if (pid[a->id] == 0)
+		ft_putstr_fd("child\n", 1);
+		//philo(table->id + 1);
+	else
+		ft_putstr_fd("parent", 1);
+		//mom(a, pid);
+	free(pid);
+	return (0);
 }

@@ -19,6 +19,7 @@ typedef struct		s_args
     int             sleep_time;
     int             number;
     sem_t           *forks;
+    int             id;
 }					t_args;
 
 
