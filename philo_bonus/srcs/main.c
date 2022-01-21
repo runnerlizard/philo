@@ -1,53 +1,27 @@
 #include "../include/philo_bonus.h"
-/*
+
 void *die_my_darling(void *ph)
 {
-	t_philo	*a;
+	t_args	*a;
 
-	a = (t_philo *)ph;
+	a = (t_args *)ph;
 	while (1)
 	{
-		if (a->ar->die_time < get_time() - a->last_meal)
+		if (a->die_time < get_time() - a->last_meal)
 		{
 			message(a, " died\n");
-			a->dead = 1;
-			pthread_mutex_unlock(&a->ar->forks[a->r]);
-			pthread_mutex_unlock(&a->ar->forks[a->id]);
-			return (0);
+			sem_close(a->send_mes);
+			free(a->pid);
+			free(a);
+			exit(1);
 		}
 		if (a->meals == 0)
-			return (0);
+			return (NULL);
 		usleep(5);
 	}
 	return(NULL);
 }
 
-static int	launch_threads(t_philo *p, t_args *a)
-{
-	int	i;
-
-	i = 0;
-	while (i < a->n)
-	{
-		p[i].id = i;
-		if (i == a->n - 1)
-			p[i].r = 0;
-		else
-			p[i].r = i + 1;
-		p[i].dead = 0;
-		p[i].meals = a->number;
-		p[i].ar = a;
-		if (pthread_create(&p[i].t, NULL, &activities, &p[i]) != 0)
-		{
-			free(a);
-			free(p);
-			return (- ft_putstr_fd("pthread_create error!\n", 1));
-		}
-		i++;
-	}
-	return (i);
-}
-*/
 
 static t_args *check_create_args(int argc, char **argv)
 {	
@@ -68,8 +42,10 @@ static t_args *check_create_args(int argc, char **argv)
 	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0) || (a->sleep_time < 0) || ( (argc == 6) && (a->number < 0)))
 		return (NULL);
 	sem_unlink("forks");
+	sem_unlink("send_mes");
+	a->send_mes = sem_open("forks", O_CREAT, 0664, 1);
 	a->forks = sem_open("forks", O_CREAT, 0664, a->n);
-	if (a->forks == SEM_FAILED)
+	if ((a->forks == SEM_FAILED) || (a->send_mes == SEM_FAILED))
 		return (NULL);
 	get_time();
 	return (a);
@@ -78,33 +54,40 @@ static t_args *check_create_args(int argc, char **argv)
 int main (int argc, char *argv[])
 {
 	t_args	*a;
-	pid_t	*pid;
+	pid_t	wpid;
 	int		i;
 	
 	a = check_create_args(argc, argv);
 	if (a == NULL)
 		return (ft_putstr_fd("Args error\n", 1));
-	pid = malloc(sizeof(pid_t) * a->n);
-	if (pid == NULL)
+	a->pid = malloc(sizeof(pid_t) * a->n);
+	if (a->pid == NULL)
+	{
+		free(a);
 		return (ft_putstr_fd("Malloc error\n", 1));
+	}
 	i = -1;
 	while (++i < a->n)
 	{
-		pid[i] = fork();
-		if (pid[i] < 0)
+		a->pid[i] = fork();
+		if (a->pid[i] < 0)
 			return (1);
-		if (pid[i] == 0)
+		if (a->pid[i] == 0)
 		{
 			a->id = i;
 			break ;
 		}
 	}
-	if (pid[a->id] == 0)
-		ft_putstr_fd("child\n", 1);
-		//philo(table->id + 1);
+	if (a->pid[a->id] == 0)
+		activities(a);
 	else
-		ft_putstr_fd("parent", 1);
-		//mom(a, pid);
-	free(pid);
+	{
+		while ((wpid = waitpid(-1, NULL, 0)) > 0)
+			;
+		sem_unlink("send_mes");
+		sem_unlink("forks");
+		free(a);
+		free(a->pid);
+	}
 	return (0);
 }

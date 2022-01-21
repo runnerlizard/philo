@@ -19,47 +19,30 @@ long int get_time()
 	}
 	return (0);
 }
-/*
-int message(t_philo *ph, char *str)
-{
-    t_philo	    *a;
-    int         i;
 
-	a = (t_philo *)ph;
-    i = 0;
-    while (a->ar->send_mes == 0)
-    {
-        usleep(10);
-        if (a->dead == 1)
-            return (1);
-        if (i++ > 100)
-            return (1);
-    }
-    a->ar->send_mes = 0;
+int message(t_args *ph, char *str)
+{
+    t_args	    *a;
+
+	a = (t_args *)ph;
+	sem_wait(a->send_mes);
     ft_putnbr_fd(get_time() / 1000, 1);
     ft_putstr_fd(" ", 1);
     ft_putnbr_fd(a->id + 1, 1);
     ft_putstr_fd(str, 1);
     if (ft_strlen(str) != 6)
-        a->ar->send_mes = 1;
+        sem_post(a->send_mes);
     return (0);
 }
 
-static int put_forks_and_sleep(t_philo *ph)
+static int put_forks_and_sleep(t_args *ph)
 {
-	t_philo *a;
+	t_args *a;
 
-	a = (t_philo *)ph;
+	a = (t_args *)ph;
 	if (a->id % 2 != 0)
-	{
-		pthread_mutex_unlock(&a->ar->forks[a->r]);
-		pthread_mutex_unlock(&a->ar->forks[a->id]);
-	}
-	else
-	{
-		pthread_mutex_unlock(&a->ar->forks[a->id]);
-		pthread_mutex_unlock(&a->ar->forks[a->r]);
-	}
+	sem_post(a->forks);
+	sem_post(a->forks);
 	a->meals--;
 	if (a->meals == 0)
 	{
@@ -67,52 +50,44 @@ static int put_forks_and_sleep(t_philo *ph)
 		return (1);
 	}
 	message(a, " is sleeping\n");
-	usleep(a->ar->sleep_time);
+	usleep(a->sleep_time);
 	message(a, " is thinking\n");
-	if (a->ar->n % 2 != 0)
-		usleep(a->ar->eat_time * 2 - a->ar->sleep_time);
+	if (a->n % 2 != 0)
+		usleep(a->eat_time * 2 - a->sleep_time);
 	return (0);
 }
 
-static void take_forks_and_eat(t_philo *ph)
+static void take_forks_and_eat(t_args *ph)
 {
-	t_philo *a;
+	t_args *a;
 
-	a = (t_philo *)ph;
+	a = (t_args *)ph;
 	if (a->id % 2 == 0)
-	{
-		pthread_mutex_lock(&a->ar->forks[a->id]);
-		pthread_mutex_lock(&a->ar->forks[a->r]);
-	}
-	else
-	{
-		pthread_mutex_lock(&a->ar->forks[a->r]);
-		pthread_mutex_lock(&a->ar->forks[a->id]);
-	}
+	sem_wait(a->forks);
+	sem_wait(a->forks);
 	a->last_meal = get_time();
 	message(a, " has taken a fork\n");
 	message(a, " is eating\n");
-	usleep(a->ar->eat_time);
+	usleep(a->eat_time);
 }
 
-void	*activities(void *ph)
+void	*activities(t_args *ph)
 {	
-	t_philo	*a;
+	t_args	*a;
 
-	a = (t_philo *)ph;
+	a = (t_args *)ph;
 	message(a, " is thinking\n");
 	a->last_meal = get_time();
 	pthread_create(&a->die_check, NULL, &die_my_darling, a);
-	if (a->ar->n % 2 == 0)
-		usleep((a->id % 2) * a->ar->eat_time / 2);
+	if (a->n % 2 == 0)
+		usleep((a->id % 2) * a->eat_time / 2);
 	else
-		usleep((a->id % 3) * a->ar->eat_time);
-	while (a->dead == 0)
+		usleep((a->id % 3) * a->eat_time);
+	while (1)
 	{
 		take_forks_and_eat(a);
 		if (put_forks_and_sleep(a) == 1)
 			break;
 	}
-	pthread_join(a->die_check, NULL);
 	return (NULL);
-}*/
+}
