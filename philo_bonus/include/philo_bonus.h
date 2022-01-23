@@ -14,15 +14,17 @@
 typedef struct		s_args
 {
     int             n;
-	int             die_time;
-	int             eat_time;
-    int             sleep_time;
+	long int        die_time;
+	long int        eat_time;
+    long int        sleep_time;
     int             number;
+    unsigned int    last_mes;
     sem_t           *send_mes;
     sem_t           *forks;
     int             id;
     int             meals;
-    int             last_meal;
+    int             dead;
+    unsigned int    last_meal;
     pthread_t       die_check;
     pid_t           *pid;
 }					t_args;

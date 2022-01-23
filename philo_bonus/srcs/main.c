@@ -3,17 +3,24 @@
 void *die_my_darling(void *ph)
 {
 	t_args	*a;
+	int		i;
 
 	a = (t_args *)ph;
-	while (1)
+	while (a->dead == 0)
 	{
 		if (a->die_time < get_time() - a->last_meal)
 		{
 			message(a, " died\n");
-			sem_close(a->send_mes);
-			free(a->pid);
-			free(a);
-			exit(1);
+			i = 0;
+			usleep(a->die_time);
+			while (i < a->n * 5)
+			{
+				sem_post(a->forks);
+				sem_post(a->send_mes);
+				usleep(1000);
+			}
+			ft_putstr_fd("finish7\n", 1);
+			break;
 		}
 		if (a->meals == 0)
 			return (NULL);
@@ -43,10 +50,12 @@ static t_args *check_create_args(int argc, char **argv)
 		return (NULL);
 	sem_unlink("forks");
 	sem_unlink("send_mes");
-	a->send_mes = sem_open("forks", O_CREAT, 0664, 1);
+	a->send_mes = sem_open("send_mes", O_CREAT, 0664, 1);
 	a->forks = sem_open("forks", O_CREAT, 0664, a->n);
 	if ((a->forks == SEM_FAILED) || (a->send_mes == SEM_FAILED))
 		return (NULL);
+	a->meals = a->number;
+	a-> dead = 0;
 	get_time();
 	return (a);
 }
@@ -54,7 +63,6 @@ static t_args *check_create_args(int argc, char **argv)
 int main (int argc, char *argv[])
 {
 	t_args	*a;
-	pid_t	wpid;
 	int		i;
 	
 	a = check_create_args(argc, argv);
@@ -82,12 +90,13 @@ int main (int argc, char *argv[])
 		activities(a);
 	else
 	{
-		while ((wpid = waitpid(-1, NULL, 0)) > 0)
-			;
+		while (waitpid(-1, NULL, 0) > 0)
+			ft_putstr_fd("finish\n", 1);	
 		sem_unlink("send_mes");
 		sem_unlink("forks");
-		free(a);
 		free(a->pid);
+		free(a);
+		ft_putstr_fd("here\n", 1);
 	}
 	return (0);
 }
