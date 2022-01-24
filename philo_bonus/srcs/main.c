@@ -53,6 +53,33 @@ static t_args *check_create_args(int argc, char **argv)
 	return (a);
 }
 
+static void	launch_child(t_args *ph)
+{
+	t_args	*a;
+	int		i;
+
+	a = ph;
+	a->pid = malloc(sizeof(pid_t) * a->n);
+	if (a->pid == NULL)
+	{
+		free(a);
+		ft_putstr_fd("Malloc error\n", 1);
+		exit (1);
+	}
+	i = -1;
+	while (++i < a->n)
+	{
+		a->pid[i] = fork();
+		if (a->pid[i] < 0)
+			i--;
+		else if (a->pid[i] == 0)
+		{
+			a->id = i;
+			break ;
+		}
+	}
+}
+
 int main (int argc, char *argv[])
 {
 	t_args	*a;
@@ -62,24 +89,7 @@ int main (int argc, char *argv[])
 	a = check_create_args(argc, argv);
 	if (a == NULL)
 		return (ft_putstr_fd("Args error\n", 1));
-	a->pid = malloc(sizeof(pid_t) * a->n);
-	if (a->pid == NULL)
-	{
-		free(a);
-		return (ft_putstr_fd("Malloc error\n", 1));
-	}
-	i = -1;
-	while (++i < a->n)
-	{
-		a->pid[i] = fork();
-		if (a->pid[i] < 0)
-			return (1);
-		if (a->pid[i] == 0)
-		{
-			a->id = i;
-			break ;
-		}
-	}
+	launch_child(a);
 	if (a->pid[a->id] == 0)
 		activities(a);
 	else
