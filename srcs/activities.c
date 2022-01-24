@@ -1,12 +1,24 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   activities.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/24 15:22:07 by Cluco             #+#    #+#             */
+/*   Updated: 2022/01/24 16:52:45 by Cluco            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/philo.h"
 
-long int get_time()
+long int	get_time(void)
 {
 	static struct timeval	tv1;
 	struct timeval			tv2;
 	static struct timezone	tz;
 	static int				i;
-	
+
 	if (i == 0)
 	{
 		i = 1;
@@ -15,39 +27,40 @@ long int get_time()
 	else
 	{
 		gettimeofday(&tv2, &tz);
-		return ((tv2.tv_sec - tv1.tv_sec) * 1000000 + tv2.tv_usec - tv1.tv_usec);
+		return ((tv2.tv_sec - tv1.tv_sec) * 1000000
+			+ tv2.tv_usec - tv1.tv_usec);
 	}
 	return (0);
 }
 
-int message(t_philo *ph, char *str)
+int	message(t_philo *ph, char *str)
 {
-    t_philo	    *a;
-    int         i;
+	t_philo	*a;
+	int		i;
 
 	a = (t_philo *)ph;
-    i = 0;
-    while (a->ar->send_mes == 0)
-    {
-        usleep(10);
-        if (a->dead == 1)
-            return (1);
-        if (i++ > 100)
-            return (1);
-    }
-    a->ar->send_mes = 0;
-    ft_putnbr_fd(get_time() / 1000, 1);
-    ft_putstr_fd(" ", 1);
-    ft_putnbr_fd(a->id + 1, 1);
-    ft_putstr_fd(str, 1);
-    if (ft_strlen(str) != 6)
-        a->ar->send_mes = 1;
-    return (0);
+	i = 0;
+	while (a->ar->send_mes == 0)
+	{
+		usleep(10);
+		if (a->dead == 1)
+			return (1);
+		if (i++ > 100)
+			return (1);
+	}
+	a->ar->send_mes = 0;
+	ft_putnbr_fd(get_time() / 1000, 1);
+	ft_putstr_fd(" ", 1);
+	ft_putnbr_fd(a->id + 1, 1);
+	ft_putstr_fd(str, 1);
+	if (ft_strlen(str) != 6)
+		a->ar->send_mes = 1;
+	return (0);
 }
 
-static int put_forks_and_sleep(t_philo *ph)
+static int	put_forks_and_sleep(t_philo *ph)
 {
-	t_philo *a;
+	t_philo	*a;
 
 	a = (t_philo *)ph;
 	if (a->id % 2 != 0)
@@ -74,9 +87,9 @@ static int put_forks_and_sleep(t_philo *ph)
 	return (0);
 }
 
-static void take_forks_and_eat(t_philo *ph)
+static void	take_forks_and_eat(t_philo *ph)
 {
-	t_philo *a;
+	t_philo	*a;
 
 	a = (t_philo *)ph;
 	if (a->id % 2 == 0)
@@ -96,7 +109,7 @@ static void take_forks_and_eat(t_philo *ph)
 }
 
 void	*activities(void *ph)
-{	
+{
 	t_philo	*a;
 
 	a = (t_philo *)ph;
@@ -111,7 +124,7 @@ void	*activities(void *ph)
 	{
 		take_forks_and_eat(a);
 		if (put_forks_and_sleep(a) == 1)
-			break;
+			break ;
 	}
 	pthread_join(a->die_check, NULL);
 	return (NULL);

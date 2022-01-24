@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/01/24 15:22:16 by Cluco             #+#    #+#              #
+#    Updated: 2022/01/24 15:22:18 by Cluco            ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 NAME = philo
 
 SRC = srcs/main.c srcs/ft_utils.c srcs/activities.c
@@ -17,13 +29,13 @@ $(NAME): $(OBJ) $(HEADER)
 	gcc $(FLAGS) -c $< -o $@ -pthread
 
 clean:
-	rm -f $(OBJ) 
+	rm -f $(OBJ)
 
 fclean:	clean
-	rm -f $(NAME) 
+	rm -f $(NAME)
 
 re: fclean all
 
 re_bonus: fclean
 
-.PHONY: clean fclean all re 
+.PHONY: clean fclean all re

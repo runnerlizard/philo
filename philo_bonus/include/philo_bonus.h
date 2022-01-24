@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_bonus.h                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/24 15:22:45 by Cluco             #+#    #+#             */
+/*   Updated: 2022/01/24 16:56:56 by Cluco            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_BONUS_H
 # define PHILO_BONUS_H
 
@@ -11,29 +23,29 @@
 # include <semaphore.h>
 # include <fcntl.h>
 
-typedef struct		s_args
+typedef struct s_args
 {
-    int             n;
-	long int        die_time;
-	long int        eat_time;
-    long int        sleep_time;
-    int             number;
-    sem_t           *send_mes;
-    sem_t           *forks;
-    int             id;
-    int             meals;
-    unsigned int    last_meal;
-    pthread_t       die_check;
-    pid_t           *pid;
-}					t_args;
+	int			n;
+	long int	die_time;
+	long int	eat_time;
+	long int	sleep_time;
+	int			number;
+	sem_t		*send_mes;
+	sem_t		*forks;
+	int			id;
+	int			meals;
+	long int	last_meal;
+	pthread_t	die_check;
+	id_t		*pid;
+}				t_args;
 
-int         ft_atoi(char const *str);
-int         message(t_args *ph, char *str);
-int 	    ft_putstr_fd(char *s, int fd);
-void	    ft_putnbr_fd(long int n, int fd);
-size_t      ft_strlen(const char *str);
-long int    get_time();
-void	    *activities(t_args *ph);
-void        *die_my_darling(void *ph);
+int			ft_atoi(char const *str);
+int			message(t_args *ph, char *str);
+int			ft_putstr_fd(char *s, int fd);
+void		ft_putnbr_fd(long int n, int fd);
+size_t		ft_strlen(const char *str);
+long int	get_time(void);
+void		*activities(t_args *ph);
+void		*die_my_darling(void *ph);
 
 #endif

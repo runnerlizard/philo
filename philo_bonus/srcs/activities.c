@@ -1,12 +1,24 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   activities.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/24 15:22:23 by Cluco             #+#    #+#             */
+/*   Updated: 2022/01/24 15:56:47 by Cluco            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/philo_bonus.h"
 
-long int get_time()
+long int	get_time(void)
 {
 	static struct timeval	tv1;
 	struct timeval			tv2;
 	static struct timezone	tz;
 	static int				i;
-	
+
 	if (i == 0)
 	{
 		i = 1;
@@ -15,30 +27,30 @@ long int get_time()
 	else
 	{
 		gettimeofday(&tv2, &tz);
-		return ((tv2.tv_sec - tv1.tv_sec) * 1000000 + tv2.tv_usec - tv1.tv_usec);
+		return ((tv2.tv_sec - tv1.tv_sec)
+			* 1000000 + tv2.tv_usec - tv1.tv_usec);
 	}
 	return (0);
 }
 
-int message(t_args *ph, char *str)
+int	message(t_args *ph, char *str)
 {
-    t_args	    *a;
+	t_args	*a;
 
 	a = (t_args *)ph;
-	
 	sem_wait(a->send_mes);
 	ft_putnbr_fd(get_time() / 1000, 1);
-    ft_putstr_fd(" ", 1);
-    ft_putnbr_fd(a->id + 1, 1);
-    ft_putstr_fd(str, 1);
-    if (ft_strlen(str) != 6)
-        sem_post(a->send_mes);
-    return (0);
+	ft_putstr_fd(" ", 1);
+	ft_putnbr_fd(a->id + 1, 1);
+	ft_putstr_fd(str, 1);
+	if (ft_strlen(str) != 6)
+		sem_post(a->send_mes);
+	return (0);
 }
 
-static int put_forks_and_sleep(t_args *ph)
+static int	put_forks_and_sleep(t_args *ph)
 {
-	t_args *a;
+	t_args	*a;
 
 	a = (t_args *)ph;
 	usleep(a->eat_time);
@@ -55,9 +67,9 @@ static int put_forks_and_sleep(t_args *ph)
 	return (0);
 }
 
-static int take_forks_and_eat(t_args *ph)
+static int	take_forks_and_eat(t_args *ph)
 {
-	t_args *a;
+	t_args	*a;
 
 	a = (t_args *)ph;
 	sem_wait(a->forks);
@@ -69,7 +81,7 @@ static int take_forks_and_eat(t_args *ph)
 }
 
 void	*activities(t_args *ph)
-{	
+{
 	t_args	*a;
 
 	a = (t_args *)ph;
@@ -90,7 +102,7 @@ void	*activities(t_args *ph)
 			sem_close(a->forks);
 			free(a->pid);
 			free(a);
-			break;
+			break ;
 		}
 	}
 	return (NULL);

@@ -1,15 +1,27 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_utils.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/24 15:22:26 by Cluco             #+#    #+#             */
+/*   Updated: 2022/01/24 15:22:26 by Cluco            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/philo_bonus.h"
 
 int	ft_putstr_fd(char *s, int fd)
 {
 	size_t	i;
-    int     j;
+	int		j;
 
 	i = 0;
-    j = 0;
+	j = 0;
 	while (s[i])
 		j = j + write (fd, &s[i++], 1);
-    return (i);
+	return (i);
 }
 
 size_t	ft_strlen(const char *str)
@@ -81,7 +93,7 @@ void	ft_putnbr_fd(long int n, int fd)
 		j = j + write(fd, &res, 1);
 	}
 	if (n < 0)
-		n = - n;
+		n = -n;
 	if (n > 9)
 		ft_write_big(fd, n);
 	else

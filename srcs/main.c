@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/24 15:21:43 by Cluco             #+#    #+#             */
+/*   Updated: 2022/01/24 16:55:19 by Cluco            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/philo.h"
 
-void *die_my_darling(void *ph)
+void	*die_my_darling(void *ph)
 {
 	t_philo	*a;
 
@@ -19,7 +31,7 @@ void *die_my_darling(void *ph)
 			return (0);
 		usleep(5);
 	}
-	return(NULL);
+	return (NULL);
 }
 
 static int	launch_threads(t_philo *p, t_args *a)
@@ -41,15 +53,15 @@ static int	launch_threads(t_philo *p, t_args *a)
 		{
 			free(a);
 			free(p);
-			return (- ft_putstr_fd("pthread_create error!\n", 1));
+			return (-ft_putstr_fd("pthread_create error!\n", 1));
 		}
 		i++;
 	}
 	return (i);
 }
 
-static int check_create_args(int argc, char **argv, t_args *a)
-{	
+static int	check_create_args(int argc, char **argv, t_args *a)
+{
 	int	i;
 
 	if ((argc != 6) && (argc != 5))
@@ -61,7 +73,8 @@ static int check_create_args(int argc, char **argv, t_args *a)
 	a->number = -1;
 	if (argc == 6)
 		a->number = ft_atoi(argv[5]);
-	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0) || (a->sleep_time < 0) || ( (argc == 6) && (a->number < 0)))
+	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0)
+		|| (a->sleep_time < 0) || ((argc == 6) && (a->number < 0)))
 		return (ft_putstr_fd("Invalid arguments.\n", 1));
 	a->send_mes = 1;
 	i = 0;
@@ -74,18 +87,19 @@ static int check_create_args(int argc, char **argv, t_args *a)
 	return (0);
 }
 
-int main (int argc, char *argv[])
+int	main(int argc, char *argv[])
 {
 	t_args	*a;
 	t_philo	*p;
 	int		i;
-	
+
 	a = malloc(sizeof(t_args));
 	if (a == NULL)
 		return (ft_putstr_fd("Malloc error1\n", 1));
 	if (check_create_args(argc, argv, a) != 0)
 		return (1);
-	if (!(p = malloc(sizeof(t_philo) * a->n)))
+	p = malloc(sizeof(t_philo) * a->n);
+	if (p == NULL)
 		return (ft_putstr_fd("Malloc error2\n", 1));
 	i = launch_threads(p, a);
 	if (i < 0)

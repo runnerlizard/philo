@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/24 15:22:36 by Cluco             #+#    #+#             */
+/*   Updated: 2022/01/24 15:54:05 by Cluco            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/philo_bonus.h"
 
-void *die_my_darling(void *ph)
+void	*die_my_darling(void *ph)
 {
 	t_args	*a;
 
@@ -20,16 +32,13 @@ void *die_my_darling(void *ph)
 			return (NULL);
 		usleep(5);
 	}
-	return(NULL);
+	return (NULL);
 }
 
-
-static t_args *check_create_args(int argc, char **argv)
-{	
+static t_args	*check_create_args(int argc, char **argv)
+{
 	t_args	*a;
 
-	if ((argc != 6) && (argc != 5))
-		return (NULL);
 	a = malloc(sizeof(t_args));
 	if (a == NULL)
 		return (NULL);
@@ -40,7 +49,8 @@ static t_args *check_create_args(int argc, char **argv)
 	a->number = -1;
 	if (argc == 6)
 		a->number = ft_atoi(argv[5]);
-	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0) || (a->sleep_time < 0) || ( (argc == 6) && (a->number < 0)))
+	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0)
+		|| (a->sleep_time < 0) || ((argc == 6) && (a->number < 0)))
 		return (NULL);
 	sem_unlink("forks");
 	sem_unlink("send_mes");
@@ -58,6 +68,8 @@ static void	launch_child(t_args *ph)
 	t_args	*a;
 	int		i;
 
+	if ((argc != 6) && (argc != 5))
+		return (NULL);
 	a = ph;
 	a->pid = malloc(sizeof(pid_t) * a->n);
 	if (a->pid == NULL)
@@ -80,12 +92,12 @@ static void	launch_child(t_args *ph)
 	}
 }
 
-int main (int argc, char *argv[])
+int	main(int argc, char *argv[])
 {
 	t_args	*a;
 	int		i;
 	pid_t	pid1;
-	
+
 	a = check_create_args(argc, argv);
 	if (a == NULL)
 		return (ft_putstr_fd("Args error\n", 1));
