@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:22:45 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/24 16:56:56 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/24 17:24:54 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ typedef struct s_args
 	int			meals;
 	long int	last_meal;
 	pthread_t	die_check;
-	id_t		*pid;
+	pid_t		*pid;
 }				t_args;
 
 int			ft_atoi(char const *str);

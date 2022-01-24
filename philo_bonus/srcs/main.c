@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:22:36 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/24 15:54:05 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/24 17:24:06 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,8 @@ static t_args	*check_create_args(int argc, char **argv)
 {
 	t_args	*a;
 
+	if ((argc != 6) && (argc != 5))
+		return (NULL);
 	a = malloc(sizeof(t_args));
 	if (a == NULL)
 		return (NULL);
@@ -58,7 +60,6 @@ static t_args	*check_create_args(int argc, char **argv)
 	a->forks = sem_open("forks", O_CREAT, 0664, a->n);
 	if ((a->forks == SEM_FAILED) || (a->send_mes == SEM_FAILED))
 		return (NULL);
-	a->meals = a->number;
 	get_time();
 	return (a);
 }
@@ -68,8 +69,6 @@ static void	launch_child(t_args *ph)
 	t_args	*a;
 	int		i;
 
-	if ((argc != 6) && (argc != 5))
-		return (NULL);
 	a = ph;
 	a->pid = malloc(sizeof(pid_t) * a->n);
 	if (a->pid == NULL)
@@ -101,6 +100,7 @@ int	main(int argc, char *argv[])
 	a = check_create_args(argc, argv);
 	if (a == NULL)
 		return (ft_putstr_fd("Args error\n", 1));
+	a->meals = a->number;
 	launch_child(a);
 	if (a->pid[a->id] == 0)
 		activities(a);
