@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:21:43 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/24 16:55:19 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/25 09:56:54 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,11 +70,11 @@ static int	check_create_args(int argc, char **argv, t_args *a)
 	a->die_time = ft_atoi(argv[2]) * 1000;
 	a->eat_time = ft_atoi(argv[3]) * 1000;
 	a->sleep_time = ft_atoi(argv[4]) * 1000;
-	a->number = -1;
+	a->number = -2;
 	if (argc == 6)
 		a->number = ft_atoi(argv[5]);
 	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0)
-		|| (a->sleep_time < 0) || ((argc == 6) && (a->number < 0)))
+		|| (a->sleep_time < 0) || ((argc == 6) && (a->number == -1)))
 		return (ft_putstr_fd("Invalid arguments.\n", 1));
 	a->send_mes = 1;
 	i = 0;

@@ -47,17 +47,17 @@ int	ft_atoi(const char *str)
 		i++;
 	if ((str[i] == '+') || (str[i] == '-'))
 	{
-		if (str[i] == '-')
+		if (str[i++] == '-')
 			sign = -1;
-		i++;
 	}
-	while ((str[i] >= 48) & (str[i] <= 57) & (a < 9999999999))
+	while ((str[i] != 0) & (a < 9999999999))
 	{
-		a = (a * 10) + (str[i] - 48);
-		i++;
+		if ((str[i] < 48) || (str[i] > 57))
+			return (-1);
+		a = (a * 10) + (str[i++] - 48);
 	}
 	if ((a > 2147483648) && (sign == -1))
-		return (0);
+		return (-1);
 	if ((a > 2147483648) || ((a == 2147483648) && (sign == 1)))
 		return (-1);
 	return (a * sign);
