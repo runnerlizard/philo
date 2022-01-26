@@ -6,7 +6,7 @@
 #    By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/24 15:22:11 by Cluco             #+#    #+#              #
-#    Updated: 2022/01/24 15:22:12 by Cluco            ###   ########.fr        #
+#    Updated: 2022/01/26 14:49:55 by Cluco            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ FLAGS = -Wall -Werror -Wextra -O2
 
 bonus: $(NAME_BONUS) $(HEADER_BONUS)
 
-$(NAME_BONUS): $(OBJ_BONUS) $(HEADER_BONUS)
+$(NAME_BONUS): $(OBJ_BONUS) $(HEADER_BONUS) Makefile
 	gcc $(OBJ_BONUS) -o $(NAME_BONUS) -pthread
 
 %.o:	%.c

@@ -6,7 +6,7 @@
 #    By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/01/24 15:22:16 by Cluco             #+#    #+#              #
-#    Updated: 2022/01/24 15:22:18 by Cluco            ###   ########.fr        #
+#    Updated: 2022/01/26 14:49:05 by Cluco            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ FLAGS = -Wall -Werror -Wextra -O2
 
 all: $(NAME) $(HEADER)
 
-$(NAME): $(OBJ) $(HEADER)
+$(NAME): $(OBJ) $(HEADER) Makefile
 	gcc $(OBJ) -o $(NAME) -pthread
 
 %.o:	%.c

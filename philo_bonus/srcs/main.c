@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:22:36 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/26 10:06:12 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/26 14:59:16 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ static t_args	*check_create_args(int argc, char **argv)
 		a->number = ft_atoi(argv[5]);
 	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0)
 		|| (a->sleep_time < 0) || ((argc == 6) && (a->number == -1)))
-		return (NULL);
+		free_exit(a, "10");
 	free_exit(a, "23");
 	a->forks = sem_open("forks", O_CREAT, 0664, a->n);
 	if (a->forks == SEM_FAILED)
