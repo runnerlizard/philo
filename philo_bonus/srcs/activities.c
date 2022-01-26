@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:22:23 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/24 15:56:47 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/26 15:33:27 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,16 +54,19 @@ static int	put_forks_and_sleep(t_args *ph)
 
 	a = (t_args *)ph;
 	usleep(a->eat_time);
-	sem_post(a->forks);
-	sem_post(a->forks);
-	a->meals--;
-	if (a->meals == 0)
-		return (1);
-	message(a, " is sleeping\n");
-	usleep(a->sleep_time);
-	message(a, " is thinking\n");
-	if (a->n % 2 != 0)
-		usleep(a->eat_time * 2 - a->sleep_time);
+	if (a->last_meal != -1)
+	{
+		sem_post(a->forks);
+		sem_post(a->forks);
+		a->meals--;
+		if (a->meals == 0)
+			return (1);
+		message(a, " is sleeping\n");
+		usleep(a->sleep_time);
+		message(a, " is thinking\n");
+		if (a->n % 2 != 0)
+			usleep(a->eat_time * 2 - a->sleep_time);
+	}
 	return (0);
 }
 
@@ -72,11 +75,14 @@ static int	take_forks_and_eat(t_args *ph)
 	t_args	*a;
 
 	a = (t_args *)ph;
-	sem_wait(a->forks);
-	sem_wait(a->forks);
-	a->last_meal = get_time();
-	message(a, " has taken a fork\n");
-	message(a, " is eating\n");
+	if (a->last_meal != -1)
+	{
+		sem_wait(a->forks);
+		sem_wait(a->forks);
+		a->last_meal = get_time();
+		message(a, " has taken a fork\n");
+		message(a, " is eating\n");
+	}
 	return (0);
 }
 

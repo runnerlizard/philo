@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:22:36 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/26 14:59:16 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/26 15:31:11 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ void	*die_my_darling(void *ph)
 	{
 		if (a->die_time < get_time() - a->last_meal)
 		{
+			a->last_meal = -1;
 			message(a, " died\n");
 			sem_close(a->send_mes);
 			sem_close(a->forks);
