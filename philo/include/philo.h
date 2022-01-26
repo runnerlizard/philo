@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:22:51 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/24 16:47:16 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/26 13:27:25 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ typedef struct s_args
 	int				sleep_time;
 	int				number;
 	int				send_mes;
+	pthread_mutex_t	postman;
 	pthread_mutex_t	*forks;
 }					t_args;
 

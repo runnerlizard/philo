@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:22:07 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/24 16:52:45 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/26 13:27:52 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,12 +49,16 @@ int	message(t_philo *ph, char *str)
 			return (1);
 	}
 	a->ar->send_mes = 0;
+	pthread_mutex_lock(&a->ar->postman);
 	ft_putnbr_fd(get_time() / 1000, 1);
 	ft_putstr_fd(" ", 1);
 	ft_putnbr_fd(a->id + 1, 1);
 	ft_putstr_fd(str, 1);
 	if (ft_strlen(str) != 6)
+	{
 		a->ar->send_mes = 1;
+		pthread_mutex_unlock(&a->ar->postman);
+	}
 	return (0);
 }
 

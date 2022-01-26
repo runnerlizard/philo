@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:21:43 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/26 09:59:49 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/26 13:26:57 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ static int	check_create_args(int argc, char **argv, t_args *a)
 		return (ft_putstr_fd("Malloc error\n", 1));
 	while (i < a->n)
 		pthread_mutex_init(&a->forks[i++], NULL);
+	pthread_mutex_init(&a->postman, NULL);
 	get_time();
 	return (0);
 }
@@ -128,5 +129,6 @@ int	main(int argc, char *argv[])
 		pthread_join(p[i].t, NULL);
 		pthread_mutex_destroy(&a->forks[i]);
 	}
+	pthread_mutex_destroy(&a->postman);
 	free_exit(a, p, "123");
 }
