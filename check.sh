@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#free in error cases
 #add mutexes check list
 
 printf "\n\n\n\n\n"

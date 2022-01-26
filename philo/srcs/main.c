@@ -6,7 +6,7 @@
 /*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:21:43 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/25 09:56:54 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/26 09:59:49 by Cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ static int	launch_threads(t_philo *p, t_args *a)
 		p[i].ar = a;
 		if (pthread_create(&p[i].t, NULL, &activities, &p[i]) != 0)
 		{
+			free(a->forks);
 			free(a);
 			free(p);
 			return (-ft_putstr_fd("pthread_create error!\n", 1));
@@ -87,6 +88,24 @@ static int	check_create_args(int argc, char **argv, t_args *a)
 	return (0);
 }
 
+static void	free_exit(t_args *a, t_philo *p, char *code)
+{
+	int	i;
+
+	i = 0;
+	while (code[i] != 0)
+	{
+		if (code[i] == '1')
+			free(a->forks);
+		else if (code[i] == '2')
+			free(a);
+		else if (code[i] == '3')
+			free(p);
+		i++;
+	}
+	exit (1);
+}
+
 int	main(int argc, char *argv[])
 {
 	t_args	*a;
@@ -97,10 +116,10 @@ int	main(int argc, char *argv[])
 	if (a == NULL)
 		return (ft_putstr_fd("Malloc error1\n", 1));
 	if (check_create_args(argc, argv, a) != 0)
-		return (1);
+		free_exit(a, NULL, "2");
 	p = malloc(sizeof(t_philo) * a->n);
 	if (p == NULL)
-		return (ft_putstr_fd("Malloc error2\n", 1));
+		free_exit(a, NULL, "12");
 	i = launch_threads(p, a);
 	if (i < 0)
 		return (1);
@@ -109,8 +128,5 @@ int	main(int argc, char *argv[])
 		pthread_join(p[i].t, NULL);
 		pthread_mutex_destroy(&a->forks[i]);
 	}
-	free(a->forks);
-	free(a);
-	free(p);
-	return (argc);
+	free_exit(a, p, "123");
 }
