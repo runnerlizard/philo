@@ -78,9 +78,10 @@ static int	take_forks_and_eat(t_args *ph)
 	if (a->last_meal != -1)
 	{
 		sem_wait(a->forks);
-		sem_wait(a->forks);
-		a->last_meal = get_time();
 		message(a, " has taken a fork\n");
+		sem_wait(a->forks);
+		message(a, " has taken a fork\n");
+		a->last_meal = get_time();
 		message(a, " is eating\n");
 	}
 	return (0);

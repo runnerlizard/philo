@@ -99,15 +99,18 @@ static void	take_forks_and_eat(t_philo *ph)
 	if (a->id % 2 == 0)
 	{
 		pthread_mutex_lock(&a->ar->forks[a->id]);
+		message(a, " has taken a fork\n");
 		pthread_mutex_lock(&a->ar->forks[a->r]);
+		message(a, " has taken a fork\n");
 	}
 	else
 	{
 		pthread_mutex_lock(&a->ar->forks[a->r]);
+		message(a, " has taken a fork\n");
 		pthread_mutex_lock(&a->ar->forks[a->id]);
+		message(a, " has taken a fork\n");
 	}
 	a->last_meal = get_time();
-	message(a, " has taken a fork\n");
 	message(a, " is eating\n");
 	usleep(a->ar->eat_time);
 }
