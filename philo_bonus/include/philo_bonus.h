@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
+/*   By: cluco <cluco@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:22:45 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/24 17:24:54 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/27 08:52:49 by cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 # include <sys/wait.h>
 # include <semaphore.h>
 # include <fcntl.h>
+# include <signal.h>
 
 typedef struct s_args
 {

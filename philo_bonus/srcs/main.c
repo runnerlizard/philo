@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: Cluco <cluco@student.21-school.ru>         +#+  +:+       +#+        */
+/*   By: cluco <cluco@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/24 15:22:36 by Cluco             #+#    #+#             */
-/*   Updated: 2022/01/26 15:31:11 by Cluco            ###   ########.fr       */
+/*   Updated: 2022/01/27 09:07:31 by cluco            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,12 @@ void	*die_my_darling(void *ph)
 	return (NULL);
 }
 
-static void	free_exit(t_args *a, char *code)
+static void	free_exit(t_args *a, char *code, char *str)
 {
 	int	i;
 
 	i = 0;
+	ft_putstr_fd(str, 1);
 	while (code[i] != 0)
 	{
 		if (code[i] == '1')
@@ -75,14 +76,14 @@ static t_args	*check_create_args(int argc, char **argv)
 		a->number = ft_atoi(argv[5]);
 	if ((a->n < 1) || (a->die_time < 0) || (a->eat_time < 0)
 		|| (a->sleep_time < 0) || ((argc == 6) && (a->number == -1)))
-		free_exit(a, "10");
-	free_exit(a, "23");
+		free_exit(a, "10", "Wrong arguments\n");
+	free_exit(a, "23", "");
 	a->forks = sem_open("forks", O_CREAT, 0664, a->n);
 	if (a->forks == SEM_FAILED)
-		free_exit(a, "10");
+		free_exit(a, "10", "Fork error\n");
 	a->send_mes = sem_open("send_mes", O_CREAT, 0664, 1);
 	if (a->send_mes == SEM_FAILED)
-		free_exit(a, "130");
+		free_exit(a, "130", "Semaphore error\n");
 	return (a);
 }
 
@@ -94,10 +95,7 @@ static void	launch_child(t_args *ph)
 	a = ph;
 	a->pid = malloc(sizeof(pid_t) * a->n);
 	if (a->pid == NULL)
-	{
-		ft_putstr_fd("Malloc error\n", 1);
-		free_exit(a, "1230");
-	}
+		free_exit(a, "1230", "Malloc error\n");
 	i = -1;
 	while (++i < a->n)
 	{
@@ -134,7 +132,7 @@ int	main(int argc, char *argv[])
 		while (++i < a->n)
 			if (a->pid[i] != pid1)
 				kill(a->pid[i], SIGTERM);
-		free_exit(a, "41230");
+		free_exit(a, "41230", "");
 	}
 	return (0);
 }
